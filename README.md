@@ -1,0 +1,2 @@
+# rust-hello
+Rust harjoitttelua
