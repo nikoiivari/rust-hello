@@ -1,2 +1,2 @@
 # rust-hello
-Rust harjoittelua
+Rust harjoittelua Tietix paja jaksolla
