@@ -1,2 +1,2 @@
 # rust-hello
-Rust harjoitttelua
+Rust harjoittelua
