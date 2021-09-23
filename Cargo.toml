@@ -1,7 +1,6 @@
-[pakage]
+[package]
 name = "test"
 version = "0.0.1"
-authors = "Niko Iivari"
 
 [dependencies]
 #gl = "0.14.0"
