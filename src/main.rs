@@ -3,7 +3,7 @@ extern crate sdl2;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-//use std::time::Duration;
+use std::time::Duration;
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -35,6 +35,7 @@ fn main() {
         }
 
         canvas.present();
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 
     // Print text to the console
