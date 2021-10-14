@@ -30,14 +30,16 @@ fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     break 'running
                 },
+                Event::Window {timestamp: _, window_id: _, win_event: w_ev} => {
+                    println!("Hello World");
+                    //w_ev;
+                },
                 _ => {}
             }
         }
 
         canvas.present();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 480));
     }
 
-    // Print text to the console
-    //println!("Hello World!");
 }
