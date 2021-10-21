@@ -30,7 +30,7 @@ fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     break 'running
                 },
-                Event::Window {timestamp: _, window_id: _, win_event: w_ev} => {
+                Event::Window {timestamp: _, window_id: _, win_event: _} => {
                     println!("Hello World");
                     //w_ev;
                 },

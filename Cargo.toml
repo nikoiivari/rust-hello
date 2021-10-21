@@ -1,5 +1,5 @@
 [package]
-name = "test"
+name = "rust-hello"
 version = "0.0.1"
 
 [dependencies]
