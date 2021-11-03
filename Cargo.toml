@@ -5,6 +5,9 @@ version = "0.0.1"
 [dependencies]
 #gl = "0.14.0"
 sdl2 = "0.34"
+vulkano = "0.26.0"
+vulkano-win = "0.26.0"
+winit = "0.25.0"
 
 #[dependencies.sdl2]
 #version = "0.34"
