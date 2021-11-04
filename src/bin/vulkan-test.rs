@@ -11,6 +11,7 @@ extern crate winit;
 
 use vulkano::Version;
 use vulkano::device::{Device, DeviceExtensions, Features};
+use vulkano::device::physical::PhysicalDevice;
 
 use vulkano_win::VkSurfaceBuild;
 //use winit::event::{Event, WindowEvent};
@@ -27,7 +28,7 @@ fn main() {
     let instance = vulkano::instance::Instance::new(None, Version::V1_1, &extensions, None)
         .unwrap();
     
-    let physical = vulkano::device::physical::PhysicalDevice::enumerate(&instance)
+    let physical = PhysicalDevice::enumerate(&instance)
         .next()
         .unwrap();
     
@@ -39,7 +40,7 @@ fn main() {
     
     // Initialize device
     // https://docs.rs/vulkano/0.26.0/vulkano/device/index.html
-    let device = {
+    
     let queuefam = physical.queue_families().next().unwrap();
     let features = Features::none();
     let extensions = DeviceExtensions {
@@ -47,11 +48,11 @@ fn main() {
         ..DeviceExtensions::none()
     };
 
-        match Device::new(physical, &features, &extensions, Some((queuefam, 1.0))) {
-            Ok(d) => d,
-            Err(err) => panic!("Couldn't build device: {:?}", err)
-        }
-    };
+        //match Device::new(physical, &features, &extensions, Some((queuefam, 1.0))) {
+        //    Ok(d) => d,
+        //    Err(err) => panic!("Couldn't build device: {:?}", err)
+        //}
+    
     
     // Get a command queue that can draw graphics
     
