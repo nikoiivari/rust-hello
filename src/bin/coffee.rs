@@ -12,8 +12,8 @@ fn main() {
     let coffee_price: f32 = 4.99;
 
     loop {
-        println!("Olet kahvilassa. Kahvi maksaa {}€", coffee_price);
-        println!("Lompakossasi on rahaa {}€", userwallet);
+        println!("Olet kahvilassa. Kahvi maksaa {:.2}€", coffee_price);
+        println!("Lompakossasi on rahaa {:.2}€", userwallet);
         println!("Ostatko kahvin? (KYLLÄ/EI)");
 
         let userstring = get_user_string();
@@ -29,7 +29,7 @@ fn main() {
         else if let UserInput::Kylla = userinput {
             if userwallet >= coffee_price {
                 userwallet = userwallet - coffee_price;
-                println!("Ostit kahvin. Lompakkoon jäi rahaa: {}€", userwallet);
+                println!("Ostit kahvin. Lompakkoon jäi rahaa: {:.2}€", userwallet);
                 println!("");                
             } else {
                 println!("Lompakossa ei ole tarpeeksi rahaa kahvin ostamiseen.");
