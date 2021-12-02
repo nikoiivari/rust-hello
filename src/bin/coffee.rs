@@ -8,25 +8,33 @@ enum UserInput {
 }
 
 fn main() {
-    //let mut userwallet = 20.00;
-    
-    get_user_yesno();
-    
+    let mut userwallet: f32 = 20.00;
+    let coffee_price: f32 = 4.99;
+
     loop {
+        println!("Olet kahvilassa. Kahvi maksaa {}€", coffee_price);
+        println!("Lompakossasi on rahaa {}€", userwallet);
+        println!("Ostatko kahvin? (KYLLÄ/EI)");
+
         let userstring = get_user_string();
         let userinput = parse_user_input(userstring);
-        if let UserInput::Virhe = userinput {println!("VIRHEEE!");break;}
-        else if let UserInput::Kylla = userinput {println!("KYLLÄÄÄ!");}
-        else if let UserInput::Ei = userinput {println!("EIII!");}
+        if let UserInput::Exit = userinput {println!("Poistut kahvilasta.");break;}
+        else if let UserInput::Virhe = userinput {
+            println!("Valitsit väärin. Sinut heitetään ulos kahvilasta.");
+            break;
+        }
+        else if let UserInput::Kylla = userinput {
+            userwallet = userwallet - coffee_price;
+            println!("Ostit kahvin. Lompakkoon jäi rahaa: {}€", userwallet);
+            println!("\n");
+        }
+        else if let UserInput::Ei = userinput {
+            println!("Et ostanut kahvia. Myyjä katselee sinua harmistuneena. Kulutat kahvilan");
+            println!("hengitysilmaa, ja viet yhden istumapaikan tuottamatta tuloja kahvilalle.");
+            println!("\n");
+        }
     }
 
-}
-
-
-fn get_user_yesno() -> UserInput {
-    println!("KYLLÄ/EI");
-        
-    return UserInput::Virhe;
 }
 
 fn get_user_string() -> String {
