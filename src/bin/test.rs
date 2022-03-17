@@ -23,6 +23,8 @@ fn main() {
 
     let mut event_pump = sdl_context.event_pump().unwrap();
 
+    let mut mousex = 0;
+    let mut mousey = 0;
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -31,9 +33,16 @@ fn main() {
                     break 'running
                 },
                 Event::Window {timestamp: _, window_id: _, win_event: _} => {
+                    //TODO: Only print sth when window is resized
                     println!("Hello World");
-                    //w_ev;
                 },
+                Event::KeyUp { keycode: Some(Keycode::Space), .. } => {
+                    println!("Space");
+                },
+                //Event::MouseButtonDown {} => 
+                Event::MouseButtonUp { x:mousex, y:mousey, .. } => {
+                    println!("Mouse x:{}, y:{}", mousex, mousey);
+                }
                 _ => {}
             }
         }
