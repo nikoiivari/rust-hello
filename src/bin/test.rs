@@ -27,11 +27,8 @@ fn main() {
 
     let mut event_pump = sdl_context.event_pump().unwrap();
 
-    let mut mousex = 0;
-    let mut mousey = 0;
-    let mut mouseb = 0;
-    let mut winw = 800;
-    let mut winh = 600;
+    //let mut win_width = 800;
+    //let mut win_height = 600;
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -42,8 +39,9 @@ fn main() {
                 Event::Window {timestamp: _, window_id: _, win_event: wev} => {
                     match wev {
                         WindowEvent::SizeChanged(winw, winh) => {
-
                              println!("Size changed {}, {}", winw, winh);
+                            //win_width = winw;
+                            //win_height = winh;
                         }
                         _ => {}    
                     }
