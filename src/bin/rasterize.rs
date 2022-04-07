@@ -18,10 +18,24 @@ struct Square {
     maxy: f32,
 }
 
+// toilet_scaled.obj is from:
+// https://opengameart.org/content/modular-bathroom-voxel-art
 
 fn main () -> Result<(), ObjError> {
-    let input = BufReader::new(File::open("objfile.obj")?);
+    let input = BufReader::new(File::open("toilet_scaled.obj")?);
     let mesh: Obj = load_obj(input)?;
+
+    let sq = Square {
+        minx: -1.0,
+        maxx:  1.0,
+        miny: -1.0,
+        maxy:  1.0,
+    };
+    let nverts = verts_in_square(sq, mesh);
+    println!("nverts = {}", nverts);
+
+    let muh_rgba = default_rgba();
+    println!("rgba = {}, {}, {}, {}", muh_rgba.r, muh_rgba.g, muh_rgba.b, muh_rgba.a);
     Ok(())
 }
 
