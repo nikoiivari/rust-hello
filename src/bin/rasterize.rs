@@ -33,17 +33,21 @@ fn main () -> Result<(), ObjError> {
     };
     let nverts = verts_in_square(sq, mesh);
     println!("nverts = {}", nverts);
-
+    
     let muh_rgba = default_rgba();
     println!("rgba = {}, {}, {}, {}", muh_rgba.r, muh_rgba.g, muh_rgba.b, muh_rgba.a);
     Ok(())
 }
 
 fn verts_in_square (sq: Square, mesh: Obj) -> u16 {
-    let count: u16 = 0;
+    let mut count: u16 = 0;
     
     for vert in mesh.vertices{
-
+        if sq.maxx >= vert.position[0] && sq.minx <= vert.position[0] &&
+            sq.maxy >= vert.position[1] && sq.miny <= vert.position[1]
+        {
+            count = count+1;
+        };
     }
     return count;
 }
