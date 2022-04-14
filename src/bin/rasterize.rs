@@ -12,10 +12,9 @@ struct RGBA {
 }
 
 struct Square {
-    minx: f32,
-    maxx: f32,
-    miny: f32,
-    maxy: f32,
+    x: f32,
+    y: f32,
+    size: f32,
 }
 
 // toilet_scaled.obj is from:
@@ -26,25 +25,70 @@ fn main () -> Result<(), ObjError> {
     let mesh: Obj = load_obj(input)?;
 
     let sq = Square {
-        minx: -1.0,
-        maxx:  1.0,
-        miny: -1.0,
-        maxy:  1.0,
+        x: -1.0,
+        y: -1.0,
+        size: 2.0,
     };
-    let nverts = verts_in_square(sq, mesh);
+    let nverts = verts_in_square(&sq, &mesh);
     println!("nverts = {}", nverts);
+
+    rasterize(sq, &mesh, 8);
     
     let muh_rgba = default_rgba();
     println!("rgba = {}, {}, {}, {}", muh_rgba.r, muh_rgba.g, muh_rgba.b, muh_rgba.a);
     Ok(())
 }
 
-fn verts_in_square (sq: Square, mesh: Obj) -> u16 {
+fn rasterize (sq: Square, mesh: &Obj, depth: u16) {
+    let nverts = verts_in_square(&sq, &mesh);
+    println!("depth = {}, nverts = {}", depth, nverts);
+
+    if 0 == depth {return};
+
+    if 0 == nverts {return};
+    
+    let half: f32 =  sq.size / 2.0;
+    
+    let sub_tl = Square {
+        x: sq.x,
+        y: sq.y + half,
+        size: half,
+    };
+
+    let sub_tr = Square {
+        x: sq.x + half,
+        y: sq.y + half,
+        size: half,
+    };
+
+    let sub_bl = Square {
+        x: sq.x,
+        y: sq.y,
+        size: half,
+    };
+
+    let sub_br = Square {
+        x: sq.x + half,
+        y: sq.y,
+        size: half,
+    };
+
+    rasterize (sub_tl, &mesh, depth - 1);
+    rasterize (sub_tr, &mesh, depth - 1);
+    rasterize (sub_bl, &mesh, depth - 1);
+    rasterize (sub_br, &mesh, depth - 1);
+
+    return;
+}
+
+fn verts_in_square (sq: &Square, mesh: &Obj) -> u16 {
     let mut count: u16 = 0;
     
-    for vert in mesh.vertices{
-        if sq.maxx >= vert.position[0] && sq.minx <= vert.position[0] &&
-            sq.maxy >= vert.position[1] && sq.miny <= vert.position[1]
+    for vert in &mesh.vertices{
+        if  sq.x + sq.size >= vert.position[0] &&
+            sq.x <= vert.position[0] &&
+            sq.y + sq.size >= vert.position[1] &&
+            sq.y <= vert.position[1]
         {
             count = count+1;
         };
