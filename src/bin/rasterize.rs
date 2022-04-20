@@ -1,15 +1,11 @@
 extern crate obj;
+extern crate png;
 
+use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
+use std::io::BufWriter; //writing .png
 use obj::{load_obj, Obj, ObjError};
-
-struct RGBA {
-    r: u8,
-    g: u8,
-    b: u8,
-    a: u8,
-}
 
 struct Square {
     x: f32,
@@ -23,7 +19,8 @@ struct Square {
 fn main () -> Result<(), ObjError> {
     let input = BufReader::new(File::open("toilet_scaled.obj")?);
     let mesh: Obj = load_obj(input)?;
-
+    let mut pixels: [u32; 65536] = [0; 65536]; // 256 x 256 = 65536 pixels
+    
     let sq = Square {
         x: -1.0,
         y: -1.0,
@@ -32,20 +29,30 @@ fn main () -> Result<(), ObjError> {
     let nverts = verts_in_square(&sq, &mesh);
     println!("nverts = {}", nverts);
 
-    rasterize(sq, &mesh, 8);
-    
-    let muh_rgba = default_rgba();
-    println!("rgba = {}, {}, {}, {}", muh_rgba.r, muh_rgba.g, muh_rgba.b, muh_rgba.a);
+    rasterize(sq, &mesh, &mut pixels, 8);
+
+    //convert to byte array    
+    let mut bytes = Vec::<u8>::new();
+    for val in &pixels{
+        bytes.extend_from_slice(&val.to_be_bytes());
+    }
+
     Ok(())
 }
 
-fn rasterize (sq: Square, mesh: &Obj, depth: u16) {
+fn rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
     let nverts = verts_in_square(&sq, &mesh);
-    println!("depth = {}, nverts = {}", depth, nverts);
-
+    
     if 0 == depth {return};
 
     if 0 == nverts {return};
+    
+    println!("depth = {}, nverts = {}", depth, nverts);
+    
+    let muh_red: u8 = 0xFF >> depth;
+    let muh_rgba: u32 = ((muh_red as u32) << 24) + 0x000000FF;
+
+    draw_square(&sq, muh_rgba, &mut pixels);
     
     let half: f32 =  sq.size / 2.0;
     
@@ -73,12 +80,16 @@ fn rasterize (sq: Square, mesh: &Obj, depth: u16) {
         size: half,
     };
 
-    rasterize (sub_tl, &mesh, depth - 1);
-    rasterize (sub_tr, &mesh, depth - 1);
-    rasterize (sub_bl, &mesh, depth - 1);
-    rasterize (sub_br, &mesh, depth - 1);
+    rasterize (sub_tl, &mesh, &mut pixels, depth - 1);
+    rasterize (sub_tr, &mesh, &mut pixels, depth - 1);
+    rasterize (sub_bl, &mesh, &mut pixels, depth - 1);
+    rasterize (sub_br, &mesh, &mut pixels, depth - 1);
 
     return;
+}
+
+fn draw_square (sq: &Square, color: u32, pixels: &mut[u32]) {
+    pixels[0] = color;
 }
 
 fn verts_in_square (sq: &Square, mesh: &Obj) -> u16 {
@@ -94,13 +105,4 @@ fn verts_in_square (sq: &Square, mesh: &Obj) -> u16 {
         };
     }
     return count;
-}
-
-fn default_rgba () -> RGBA {
-    RGBA {
-        r: 0,
-        g: 0,
-        b: 0,
-        a: 0,
-    }
 }
