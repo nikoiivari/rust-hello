@@ -29,13 +29,9 @@ fn main () -> Result<(), ObjError> {
     let nverts = verts_in_square(&sq, &mesh);
     println!("nverts = {}", nverts);
 
-    rasterize(sq, &mesh, &mut pixels, 8);
+    rasterize(sq, &mesh, &mut pixels, 9);
 
-    //convert to byte array    
-    let mut bytes = Vec::<u8>::new();
-    for val in &pixels{
-        bytes.extend_from_slice(&val.to_be_bytes());
-    }
+    write_png(&mut pixels);
 
     Ok(())
 }
@@ -47,9 +43,9 @@ fn rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
 
     if 0 == nverts {return};
     
-    println!("depth = {}, nverts = {}", depth, nverts);
+    //println!("depth = {}, nverts = {}", depth, nverts);
     
-    let muh_red: u8 = 0xFF >> depth;
+    let muh_red = 0xFFu8 / depth;
     let muh_rgba: u32 = ((muh_red as u32) << 24) + 0x000000FF;
 
     draw_square(&sq, muh_rgba, &mut pixels);
@@ -89,7 +85,46 @@ fn rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
 }
 
 fn draw_square (sq: &Square, color: u32, pixels: &mut[u32]) {
-    pixels[0] = color;
+    let x = ((sq.x * 128.0) + 128.0) as u8;
+    let y = ((sq.y * -128.0) + 128.0) as u8;
+    let siz = (sq.size * 128.0) as u8;
+
+    for i in 0..siz {
+        let rows: usize = 256 * y as usize;
+        let start: usize = rows + x as usize;
+        pixels[start + i as usize] = color;
+    }
+
+    pixels[1] = 0xffffffff;
+}
+
+fn write_png (pixels: &mut[u32]) {
+    //convert to byte array    
+    let mut bytes = Vec::<u8>::new();
+    for val in pixels{
+        bytes.extend_from_slice(&val.to_be_bytes());
+    }
+
+    let path = Path::new(r"raster.png");
+    let file = File::create(path).unwrap();
+    let ref mut w = BufWriter::new(file);
+
+    let mut encoder = png::Encoder::new(w, 256, 256);
+    encoder.set_color(png::ColorType::Rgba);
+    encoder.set_depth(png::BitDepth::Eight);
+    encoder.set_trns(vec!(0xFFu8, 0xFFu8, 0xFFu8, 0xFFu8));
+    encoder.set_source_gamma(png::ScaledFloat::from_scaled(45455));
+    encoder.set_source_gamma(png::ScaledFloat::new(1.0 / 2.2));
+    let source_chromaticities = png::SourceChromaticities::new(
+        (0.31270, 0.32900),
+        (0.64000, 0.33000),
+        (0.30000, 0.60000),
+        (0.15000, 0.06000)
+    );
+    encoder.set_source_chromaticities(source_chromaticities);
+    let mut writer = encoder.write_header().unwrap();
+
+    writer.write_image_data(&bytes).unwrap();
 }
 
 fn verts_in_square (sq: &Square, mesh: &Obj) -> u16 {
