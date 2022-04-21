@@ -86,13 +86,17 @@ fn rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
 
 fn draw_square (sq: &Square, color: u32, pixels: &mut[u32]) {
     let x = ((sq.x * 128.0) + 128.0) as u8;
-    let y = ((sq.y * -128.0) + 128.0) as u8;
+    let y = ((sq.y * 128.0) + 128.0) as u8;
     let siz = (sq.size * 128.0) as u8;
+    let size = siz as usize;
 
-    for i in 0..siz {
-        let rows: usize = 256 * y as usize;
-        let start: usize = rows + x as usize;
-        pixels[start + i as usize] = color;
+    let offset: usize = 256 * y as usize;
+    let row_offset: usize = x as usize;
+    
+    for i in 0..size {
+        for j in 0..size {
+            pixels[offset + (row_offset * i)+j] = color;
+        }
     }
 
     pixels[1] = 0xffffffff;
