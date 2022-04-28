@@ -4,7 +4,8 @@ Rust harjoittelua Tietix pajajaksolla.
 ## coffee.rs
 Tekstipohjainen kahvilapeli jossa voi vastata vain KYLLÄ tai EI.
 
+## rasterize.rs
+rasteroi lightwave .OBJ muotoisia 3D-malleja 256x256 pixelin spriteiksi. (tällä hetkellä bugaa).
+
 ## test.rs
 SDL2-rajapinnalla tehty 2D pelinteko kokeilu.
-
-(poistin vulkan-test.rs:n, koska en saanut sitä käännettyä ilman virheitä ja se näytti muutenkin liian työläältä)
