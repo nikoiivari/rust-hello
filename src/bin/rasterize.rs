@@ -13,6 +13,15 @@ struct Square {
     size: f32,
 }
 
+//aargh! https://rcoh.me/posts/rust-linked-list-basically-impossible/
+struct QuadSons {
+    ptr: Option<Box<QuadSons>>,
+    a_verts: u16,
+    b_verts: u16,
+    c_verts: u16,
+    d_verst: u16,
+}
+
 // toilet_scaled.obj is from:
 // https://opengameart.org/content/modular-bathroom-voxel-art
 
@@ -34,6 +43,10 @@ fn main () -> Result<(), ObjError> {
     write_png(&mut pixels);
 
     Ok(())
+}
+
+fn quadtree_from_obj(sq: Square, mesh: &Obj,){
+//TODO...
 }
 
 fn rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
