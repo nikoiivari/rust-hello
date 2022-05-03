@@ -14,13 +14,6 @@ struct Square {
 }
 
 //aargh! https://rcoh.me/posts/rust-linked-list-basically-impossible/
-struct QuadSons {
-    ptr: Option<Box<QuadSons>>,
-    a_verts: u16,
-    b_verts: u16,
-    c_verts: u16,
-    d_verst: u16,
-}
 
 // toilet_scaled.obj is from:
 // https://opengameart.org/content/modular-bathroom-voxel-art
@@ -38,18 +31,45 @@ fn main () -> Result<(), ObjError> {
     let nverts = verts_in_square(&sq, &mesh);
     println!("nverts = {}", nverts);
 
-    rasterize(sq, &mesh, &mut pixels, 9);
+    //_rasterize(sq, &mesh, &mut pixels, 9);
+
+    for y in 0..=255 {
+        for x  in 0..=255 {
+            pixel_sample_points(x, y, &mesh, &mut pixels);
+        }
+    }
 
     write_png(&mut pixels);
 
     Ok(())
 }
 
-fn quadtree_from_obj(sq: Square, mesh: &Obj,){
-//TODO...
+fn pixel_sample_points (x: u8, y: u8, mesh: &Obj, pixels: &mut [u32]) {
+    let xf = ((x as f32) ) -1.0;
+    let yf = ((y as f32) ) -1.0;
+
+    let mut z1st: f32 = -2.01;
+    //let mut z2nd: f32 = -2.0;
+    let z1stcolor: u32 = 0xffffffff;
+    //let z2ndcolor: u32 = 0xffffffff;
+
+    for vert in &mesh.vertices {
+        if 0.1 < (vert.position[0] - xf).abs() && 0.1  < (vert.position[1] - yf).abs() {
+            if z1st < vert.position[2] {
+                //z2nd = z1st;
+                z1st = vert.position[2];
+                //TODO: Get vertex color
+            }
+        }   
+    }
+
+    if z1st > -1.0 {
+        pixels[(256 * (y as usize)) + (x as usize)] = z1stcolor;
+        //TODO: Average z1stcolor and z2ndcolor
+    }
 }
 
-fn rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
+fn _rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
     let nverts = verts_in_square(&sq, &mesh);
     
     if 0 == depth {return};
@@ -61,7 +81,7 @@ fn rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
     let muh_red = 0xFFu8 / depth;
     let muh_rgba: u32 = ((muh_red as u32) << 24) + 0x000000FF;
 
-    draw_square(&sq, muh_rgba, &mut pixels);
+    _draw_square(&sq, muh_rgba, &mut pixels);
     
     let half: f32 =  sq.size / 2.0;
     
@@ -89,15 +109,15 @@ fn rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
         size: half,
     };
 
-    rasterize (sub_tl, &mesh, &mut pixels, depth - 1);
-    rasterize (sub_tr, &mesh, &mut pixels, depth - 1);
-    rasterize (sub_bl, &mesh, &mut pixels, depth - 1);
-    rasterize (sub_br, &mesh, &mut pixels, depth - 1);
+    _rasterize (sub_tl, &mesh, &mut pixels, depth - 1);
+    _rasterize (sub_tr, &mesh, &mut pixels, depth - 1);
+    _rasterize (sub_bl, &mesh, &mut pixels, depth - 1);
+    _rasterize (sub_br, &mesh, &mut pixels, depth - 1);
 
     return;
 }
 
-fn draw_square (sq: &Square, color: u32, pixels: &mut[u32]) {
+fn _draw_square (sq: &Square, color: u32, pixels: &mut[u32]) {
     let x = ((sq.x * 128.0) + 128.0) as u8;
     let y = ((sq.y * 128.0) + 128.0) as u8;
     let siz = (sq.size * 128.0) as u8;
