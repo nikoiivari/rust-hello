@@ -31,7 +31,7 @@ fn pixel_sample_points (x: u8, y: u8, pixelsize: f32, mesh: &Obj, pixels: &mut [
 
     let mut z1st: f32 = -2.01;
     //let mut z2nd: f32 = -2.0;
-    let z1stcolor: u32 = 0xffffffff;
+    let z1stcolor: u32 = 0x116666ff;
     //let z2ndcolor: u32 = 0xffffffff;
 
     for vert in &mesh.vertices {
