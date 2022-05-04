@@ -9,5 +9,7 @@ rasteroi lightwave .OBJ muotoisia 3D-malleja 256x256 pixelin spriteiksi, piirtä
 niiden paksuiksi paisutetut verteksit .PNG-kuvaksi.
 Tällä hetkellä vaatii vielä vähän hienosäätöä.
 
+[Rasteroidut vertexit](https://raw.githubusercontent.com/nikoiivari/rust-hello/main/raster.png)
+
 ## test.rs
 SDL2-rajapinnalla tehty 2D pelinteko kokeilu.
