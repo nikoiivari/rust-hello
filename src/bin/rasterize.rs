@@ -10,13 +10,13 @@ use obj::{load_obj, Obj, ObjError};
 // Replaced toilet_scaled.obj with a subdivided 3/4ths sphere
 
 fn main () -> Result<(), ObjError> {
-    let input = BufReader::new(File::open("toilet_scaled.obj")?);
+    let input = BufReader::new(File::open("3of4sphere.obj")?);
     let mesh: Obj = load_obj(input)?;
     let mut pixels: [u32; 65536] = [0; 65536]; // 256 x 256 = 65536 pixels
 
     for y in 0..=255 {
         for x  in 0..=255 {
-            pixel_sample_points(x, y, &mesh, &mut pixels);
+            pixel_sample_points(x, y, 0.05, &mesh, &mut pixels);
         }
     }
 
@@ -25,7 +25,7 @@ fn main () -> Result<(), ObjError> {
     Ok(())
 }
 
-fn pixel_sample_points (x: u8, y: u8, mesh: &Obj, pixels: &mut [u32]) {
+fn pixel_sample_points (x: u8, y: u8, pixelsize: f32, mesh: &Obj, pixels: &mut [u32]) {
     let xf = ((x as f32) / 128.0) - 1.0;
     let yf = ((y as f32) / 128.0) - 1.0;
 
@@ -35,8 +35,8 @@ fn pixel_sample_points (x: u8, y: u8, mesh: &Obj, pixels: &mut [u32]) {
     //let z2ndcolor: u32 = 0xffffffff;
 
     for vert in &mesh.vertices {
-        if (xf - vert.position[0]).abs() < 0.1 && 
-           (yf - vert.position[1]).abs() < 0.1 {
+        if (xf - vert.position[0]).abs() < pixelsize && 
+           (yf - vert.position[1]).abs() < pixelsize {
             if z1st < vert.position[2] {
                 //z2nd = z1st;
                 z1st = vert.position[2];
