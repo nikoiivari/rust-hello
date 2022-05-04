@@ -45,8 +45,8 @@ fn main () -> Result<(), ObjError> {
 }
 
 fn pixel_sample_points (x: u8, y: u8, mesh: &Obj, pixels: &mut [u32]) {
-    let xf = ((x as f32) ) -1.0;
-    let yf = ((y as f32) ) -1.0;
+    let xf = ((x as f32) - 128.0) / 256.0;
+    let yf = ((y as f32) - 128.0) / 256.0;
 
     let mut z1st: f32 = -2.01;
     //let mut z2nd: f32 = -2.0;
@@ -54,7 +54,8 @@ fn pixel_sample_points (x: u8, y: u8, mesh: &Obj, pixels: &mut [u32]) {
     //let z2ndcolor: u32 = 0xffffffff;
 
     for vert in &mesh.vertices {
-        if 0.1 < (vert.position[0] - xf).abs() && 0.1  < (vert.position[1] - yf).abs() {
+        if (xf - vert.position[0]).abs() < 0.02 && 
+           (yf - vert.position[1]).abs() < 0.02 {
             if z1st < vert.position[2] {
                 //z2nd = z1st;
                 z1st = vert.position[2];
@@ -67,72 +68,6 @@ fn pixel_sample_points (x: u8, y: u8, mesh: &Obj, pixels: &mut [u32]) {
         pixels[(256 * (y as usize)) + (x as usize)] = z1stcolor;
         //TODO: Average z1stcolor and z2ndcolor
     }
-}
-
-fn _rasterize (sq: Square, mesh: &Obj, mut pixels: &mut [u32], depth: u8) {
-    let nverts = verts_in_square(&sq, &mesh);
-    
-    if 0 == depth {return};
-
-    if 0 == nverts {return};
-    
-    //println!("depth = {}, nverts = {}", depth, nverts);
-    
-    let muh_red = 0xFFu8 / depth;
-    let muh_rgba: u32 = ((muh_red as u32) << 24) + 0x000000FF;
-
-    _draw_square(&sq, muh_rgba, &mut pixels);
-    
-    let half: f32 =  sq.size / 2.0;
-    
-    let sub_tl = Square {
-        x: sq.x,
-        y: sq.y + half,
-        size: half,
-    };
-
-    let sub_tr = Square {
-        x: sq.x + half,
-        y: sq.y + half,
-        size: half,
-    };
-
-    let sub_bl = Square {
-        x: sq.x,
-        y: sq.y,
-        size: half,
-    };
-
-    let sub_br = Square {
-        x: sq.x + half,
-        y: sq.y,
-        size: half,
-    };
-
-    _rasterize (sub_tl, &mesh, &mut pixels, depth - 1);
-    _rasterize (sub_tr, &mesh, &mut pixels, depth - 1);
-    _rasterize (sub_bl, &mesh, &mut pixels, depth - 1);
-    _rasterize (sub_br, &mesh, &mut pixels, depth - 1);
-
-    return;
-}
-
-fn _draw_square (sq: &Square, color: u32, pixels: &mut[u32]) {
-    let x = ((sq.x * 128.0) + 128.0) as u8;
-    let y = ((sq.y * 128.0) + 128.0) as u8;
-    let siz = (sq.size * 128.0) as u8;
-    let size = siz as usize;
-
-    let offset: usize = 256 * y as usize;
-    let row_offset: usize = x as usize;
-    
-    for i in 0..size {
-        for j in 0..size {
-            pixels[offset + (row_offset * i)+j] = color;
-        }
-    }
-
-    pixels[1] = 0xffffffff;
 }
 
 fn write_png (pixels: &mut[u32]) {
