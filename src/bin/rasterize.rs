@@ -4,34 +4,15 @@ extern crate png;
 use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
-use std::io::BufWriter; //writing .png
+use std::io::BufWriter;
 use obj::{load_obj, Obj, ObjError};
 
-struct Square {
-    x: f32,
-    y: f32,
-    size: f32,
-}
-
-//aargh! https://rcoh.me/posts/rust-linked-list-basically-impossible/
-
-// toilet_scaled.obj is from:
-// https://opengameart.org/content/modular-bathroom-voxel-art
+// Replaced toilet_scaled.obj with a subdivided 3/4ths sphere
 
 fn main () -> Result<(), ObjError> {
     let input = BufReader::new(File::open("toilet_scaled.obj")?);
     let mesh: Obj = load_obj(input)?;
     let mut pixels: [u32; 65536] = [0; 65536]; // 256 x 256 = 65536 pixels
-    
-    let sq = Square {
-        x: -1.0,
-        y: -1.0,
-        size: 2.0,
-    };
-    let nverts = verts_in_square(&sq, &mesh);
-    println!("nverts = {}", nverts);
-
-    //_rasterize(sq, &mesh, &mut pixels, 9);
 
     for y in 0..=255 {
         for x  in 0..=255 {
@@ -45,8 +26,8 @@ fn main () -> Result<(), ObjError> {
 }
 
 fn pixel_sample_points (x: u8, y: u8, mesh: &Obj, pixels: &mut [u32]) {
-    let xf = ((x as f32) - 128.0) / 256.0;
-    let yf = ((y as f32) - 128.0) / 256.0;
+    let xf = ((x as f32) / 128.0) - 1.0;
+    let yf = ((y as f32) / 128.0) - 1.0;
 
     let mut z1st: f32 = -2.01;
     //let mut z2nd: f32 = -2.0;
@@ -54,8 +35,8 @@ fn pixel_sample_points (x: u8, y: u8, mesh: &Obj, pixels: &mut [u32]) {
     //let z2ndcolor: u32 = 0xffffffff;
 
     for vert in &mesh.vertices {
-        if (xf - vert.position[0]).abs() < 0.02 && 
-           (yf - vert.position[1]).abs() < 0.02 {
+        if (xf - vert.position[0]).abs() < 0.1 && 
+           (yf - vert.position[1]).abs() < 0.1 {
             if z1st < vert.position[2] {
                 //z2nd = z1st;
                 z1st = vert.position[2];
@@ -65,7 +46,7 @@ fn pixel_sample_points (x: u8, y: u8, mesh: &Obj, pixels: &mut [u32]) {
     }
 
     if z1st > -1.0 {
-        pixels[(256 * (y as usize)) + (x as usize)] = z1stcolor;
+        pixels[(256*256) - (256 * (y as usize)) + (x as usize)] = z1stcolor;
         //TODO: Average z1stcolor and z2ndcolor
     }
 }
@@ -97,19 +78,4 @@ fn write_png (pixels: &mut[u32]) {
     let mut writer = encoder.write_header().unwrap();
 
     writer.write_image_data(&bytes).unwrap();
-}
-
-fn verts_in_square (sq: &Square, mesh: &Obj) -> u16 {
-    let mut count: u16 = 0;
-    
-    for vert in &mesh.vertices{
-        if  sq.x + sq.size >= vert.position[0] &&
-            sq.x <= vert.position[0] &&
-            sq.y + sq.size >= vert.position[1] &&
-            sq.y <= vert.position[1]
-        {
-            count = count+1;
-        };
-    }
-    return count;
 }
