@@ -1,3 +1,4 @@
+extern crate ply_rs;
 extern crate obj;
 extern crate png;
 
@@ -12,6 +13,17 @@ use obj::{load_obj, Obj, ObjError};
 fn main () -> Result<(), ObjError> {
     let input = BufReader::new(File::open("3of4sphere.obj")?);
     let mesh: Obj = load_obj(input)?;
+    
+    let path = "VertexColorsTest.ply";
+    let mut plyfile = std::fs::File::open(path).unwrap();
+    let p = ply_rs::parser::Parser::<ply_rs::ply::DefaultElement>::new();
+    let ply = p.read_ply(&mut plyfile);
+    assert!(ply.is_ok());
+    let ply = ply.unwrap();
+
+    println!("Ply header: {:#?}", ply.header);
+    
+    
     let mut pixels: [u32; 65536] = [0; 65536]; // 256 x 256 = 65536 pixels
 
     for y in 0..=255 {
