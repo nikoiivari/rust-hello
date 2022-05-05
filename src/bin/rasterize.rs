@@ -6,23 +6,84 @@ use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::BufWriter;
+use ply_rs::ply;
+use ply_rs::parser;
 use obj::{load_obj, Obj, ObjError};
 
-// Replaced toilet_scaled.obj with a subdivided 3/4ths sphere
+#[derive(Debug)]
+struct PlyVertex {
+    x: f32,
+    y: f32,
+    z: f32,
+    nx: f32,
+    ny: f32,
+    nz: f32,
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8,
+}
+
+impl ply::PropertyAccess for PlyVertex {
+    fn new() -> Self {
+        PlyVertex {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            nx: 0.0,
+            ny: 0.0,
+            nz: 1.0,
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+            a: 0xff,
+        }
+    }
+    fn set_property(&mut self, key: String, property: ply::Property) {
+        match (key.as_ref(), property) {
+            ("x", ply::Property::Float(v)) => self.x = v,
+            ("y", ply::Property::Float(v)) => self.y = v,
+            ("z", ply::Property::Float(v)) => self.z = v,
+            ("nx", ply::Property::Float(v))=> self.nx = v,
+            ("ny", ply::Property::Float(v))=> self.ny = v,
+            ("nz", ply::Property::Float(v))=> self.nz = v,
+            ("red", ply::Property::UChar(v)) => self.r = v,
+            ("green", ply::Property::UChar(v)) => self.g = v,
+            ("blue", ply::Property::UChar(v)) => self.b = v,
+            ("alpha", ply::Property::UChar(v)) => self.a = v,
+            (k, _) => panic!("PlyVertex: Unexpected key/value combination: key: {}", k),
+        }
+    }
+}
+
 
 fn main () -> Result<(), ObjError> {
     let input = BufReader::new(File::open("3of4sphere.obj")?);
     let mesh: Obj = load_obj(input)?;
     
+    //use ply_rs
     let path = "VertexColorsTest.ply";
-    let mut plyfile = std::fs::File::open(path).unwrap();
-    let p = ply_rs::parser::Parser::<ply_rs::ply::DefaultElement>::new();
-    let ply = p.read_ply(&mut plyfile);
-    assert!(ply.is_ok());
-    let ply = ply.unwrap();
+    let plyfile = std::fs::File::open(path).unwrap();
+    let mut plyfile = std::io::BufReader::new(plyfile);
 
-    println!("Ply header: {:#?}", ply.header);
-    
+    //parser
+    let vertexparser = parser::Parser::<PlyVertex>::new();
+    let header = vertexparser.read_header(&mut plyfile).unwrap();
+    let mut vertices = Vec::new();
+    for (_ignore_key, element) in &header.elements {
+        match element.name.as_ref() {
+            "vertex" => {
+                vertices = vertexparser.read_payload_for_element(
+                    &mut plyfile, &element, &header
+                ).unwrap();
+            },
+            "face" => {},
+            _ => panic!("Enexpeced element!"),
+        }
+    }   
+
+    //println!("Ply header: {:#?}", ply.header);
+    println!("vertices: {:#?}", vertices);
     
     let mut pixels: [u32; 65536] = [0; 65536]; // 256 x 256 = 65536 pixels
 
