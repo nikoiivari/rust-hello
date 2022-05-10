@@ -85,7 +85,7 @@ fn main () {
 
     for y in 0..=255 {
         for x  in 0..=255 {
-            pixel_sample_verts(x, y, 0.05, &vertices, &mut pixels);
+            pixel_sample_ply(x, y, 0.05, &vertices, &mut pixels);
         }
     }
 
@@ -93,29 +93,41 @@ fn main () {
 
 }
 
-fn pixel_sample_verts (x: u8, y: u8, pixelsize: f32, vertices: &[Vertex], pixels: &mut [u32]) {
+fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex], pixels: &mut [u32]) {
     let xf = ((x as f32) / 128.0) - 1.0;
     let yf = ((y as f32) / 128.0) - 1.0;
 
     let mut z1st: f32 = -2.01;
-    //let mut z2nd: f32 = -2.0;
-    let z1stcolor: u32 = 0x116666ff;
-    //let z2ndcolor: u32 = 0xffffffff;
+    let mut z1stcolor: u32 = 0x000000ff;
+    let mut z2ndcolor: u32 = 0xffffffff;
 
-    for vert in vertices {
-        if (xf - vert.x).abs() < pixelsize && 
-           (yf - vert.y).abs() < pixelsize {
+    for vert in verts {
+        if (xf - vert.x).abs() < psize && 
+           (yf - vert.y).abs() < psize {
             if z1st < vert.z {
-                //z2nd = z1st;
                 z1st = vert.z;
-                //TODO: Get vertex color
+                z2ndcolor = z1stcolor;
+                z1stcolor  = ((vert.r as u32) << 24) +
+                             ((vert.g as u32) << 16) + 
+                             ((vert.b as u32) << 8) + 0xff;
             }
         }   
     }
 
     if z1st > -1.0 {
-        pixels[(256*256) - (256 * (y as usize)) + (x as usize)] = z1stcolor;
-        //TODO: Average z1stcolor and z2ndcolor
+        // Average z1stcolor and z2ndcolor
+        let r1: u32 = z1stcolor >> 24;
+        let r2: u32 = z2ndcolor >> 24;
+        let red: u32 = (r1 + r2) >> 1;
+        let g1: u32 = (z1stcolor >> 16) & 0x000000ff;
+        let g2: u32 = (z2ndcolor >> 16) & 0x000000ff;
+        let green: u32 = (g1 + g2) >> 1;
+        let b1: u32 = (z1stcolor >> 8) & 0x000000ff;
+        let b2: u32 = (z2ndcolor >> 8) & 0x000000ff;
+        let blue: u32 = (b1 + b2) >> 1;
+        let zfinalcolor = (red << 24) + (green << 16) + (blue << 8) + 0xff;
+        pixels[(256*256) - (256 * (y as usize)) + (x as usize)] = zfinalcolor;
+        
     }
 }
 
