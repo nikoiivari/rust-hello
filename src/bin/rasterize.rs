@@ -99,14 +99,12 @@ fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex], pixels: &mut [u
 
     let mut z1st: f32 = -2.01;
     let mut z1stcolor: u32 = 0x000000ff;
-    let mut z2ndcolor: u32 = 0xffffffff;
-
+    
     for vert in verts {
         if (xf - vert.x).abs() < psize && 
            (yf - vert.y).abs() < psize {
             if z1st < vert.z {
                 z1st = vert.z;
-                z2ndcolor = z1stcolor;
                 z1stcolor  = ((vert.r as u32) << 24) +
                              ((vert.g as u32) << 16) + 
                              ((vert.b as u32) << 8) + 0xff;
@@ -115,18 +113,8 @@ fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex], pixels: &mut [u
     }
 
     if z1st > -1.0 {
-        // Average z1stcolor and z2ndcolor
-        let r1: u32 = z1stcolor >> 24;
-        let r2: u32 = z2ndcolor >> 24;
-        let red: u32 = (r1 + r2) >> 1;
-        let g1: u32 = (z1stcolor >> 16) & 0x000000ff;
-        let g2: u32 = (z2ndcolor >> 16) & 0x000000ff;
-        let green: u32 = (g1 + g2) >> 1;
-        let b1: u32 = (z1stcolor >> 8) & 0x000000ff;
-        let b2: u32 = (z2ndcolor >> 8) & 0x000000ff;
-        let blue: u32 = (b1 + b2) >> 1;
-        let zfinalcolor = (red << 24) + (green << 16) + (blue << 8) + 0xff;
-        pixels[(256*256) - (256 * (y as usize)) + (x as usize)] = zfinalcolor;
+                
+        pixels[(256*256) - (256 * (y as usize)) + (x as usize)] = z1stcolor;
         
     }
 }
