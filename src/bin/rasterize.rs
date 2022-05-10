@@ -75,7 +75,7 @@ fn main () {
                 ).unwrap();
             },
             "face" => {},
-            _ => panic!("Enexpeced element!"),
+            _ => panic!("Unexpeced element!"),
         }
     }   
 
