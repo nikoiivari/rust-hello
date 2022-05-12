@@ -55,6 +55,32 @@ impl ply::PropertyAccess for Vertex {
     }
 }
 
+struct BiVec3 {
+    xy: f32,
+    xz: f32,
+    yz: f32,
+}
+
+impl BiVec3 {
+    fn new() -> Self {
+        BiVec3 {
+            xy: 0.0,
+            xz: 0.0,
+            yz: 0.0,
+        }
+    }
+}
+
+fn outer (a: Vertex, b: Vertex) -> BiVec3 {
+    let mut c =  BiVec3::new();
+    c.xy = a.x * b.y - a.y * b.x;
+    c.xz = a.x * b.z - a.z * b.x;
+    c.yz = a.y * b.z - a.z * b.y;
+
+    return c
+}
+
+fn rotate ()
 
 fn main () {
     
