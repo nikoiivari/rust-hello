@@ -80,8 +80,6 @@ fn outer (a: Vertex, b: Vertex) -> BiVec3 {
     return c
 }
 
-fn rotate ()
-
 fn main () {
     
     //use ply_rs
