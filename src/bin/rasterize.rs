@@ -99,6 +99,7 @@ struct Rotor3 {
 }
 
 impl Rotor3 {
+    /*
     fn new() -> Self {
         Rotor3 {
             s: 0.0,
@@ -107,6 +108,7 @@ impl Rotor3 {
             yz: 0.0,
         }
     }
+    */
     fn new_from_vert_to_vert(a: Vertex, b: Vertex) -> Self{
         let bv: BiVec3 = outer3(&a, &b);
         let mut r =  Rotor3 {
@@ -127,9 +129,19 @@ impl Rotor3 {
         self.s /= length;
         self.xy /= length; self.xz /= length; self.yz /= length;
     }
-    //fn rotate(v: Vertex) -> Vertex {
-        //TODO!
-    //}
+    fn rotate(self, v: &Vertex) -> Vertex {
+        let tmp_x: f32 = self.s * v.x + v.y * self.xy + v.z * self.xz;
+        let tmp_y: f32 = self.s * v.y - v.x * self.xy + v.z * self.yz;
+        let tmp_z: f32 = self.s * v.z - v.x * self.xz - v.y * self.yz;
+        let tri: f32 = v.x * self.yz - v.y * self.xz + v.z * self.xy;
+        let r_x: f32 = self.s * tmp_x + tmp_y * self.xy + tmp_z * self.xz + tri   * self.yz;
+        let r_y: f32 = self.s * tmp_y - tmp_x * self.xy - tri   * self.xz + tmp_z * self.yz;
+        let r_z: f32 = self.s * tmp_z + tri   * self.xy - tmp_x * self.xz - tmp_y * self.yz;
+        let mut vert: Vertex = Vertex::new_with_xyz(r_x, r_y, r_z);
+        vert.nx = v.nx; vert.ny = v.ny; vert.nz = v.nz;
+        vert.r = v.r; vert.g = v.g; vert.b = v.b; vert.a = v.a;
+        return vert
+    }
 }
 
 fn outer3 (a: &Vertex, b: &Vertex) -> BiVec3 {
@@ -169,10 +181,14 @@ fn main () {
     }   
 
     // rotate
-    let v1 = Vertex::new_with_xyz(0.0, 0.0, 1.0);
-    let v2 = Vertex::new_with_xyz(0.0, 1.0, 0.0);
-    let r = Rotor3::new_from_vert_to_vert(v1, v2);
-    //TODO: implement Rotor3::rotate()
+    let mut rotated_vertices = Vec::new();
+    for vert in &vertices {
+        let v1 = Vertex::new_with_xyz(0.0, 0.0, -1.0);
+        let v2 = Vertex::new_with_xyz(0.0, 1.0, 0.0);
+        let rotor = Rotor3::new_from_vert_to_vert(v1, v2);
+        let rotated_vert: Vertex = rotor.rotate(&vert);
+        rotated_vertices.push( rotated_vert );
+    }
 
     //println!("vertices: {:#?}", vertices);
     
@@ -180,7 +196,7 @@ fn main () {
 
     for y in 0..=255 {
         for x  in 0..=255 {
-            pixel_sample_ply(x, y, 0.05, &vertices, &mut pixels);
+            pixel_sample_ply(x, y, 0.05, &rotated_vertices, &mut pixels);
         }
     }
 
