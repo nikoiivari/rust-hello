@@ -1,5 +1,5 @@
-#![allow(non_snake_case)]
-#![allow(dead_code)]
+//#![allow(non_snake_case)]
+//#![allow(dead_code)]
 
 extern crate ply_rs;
 extern crate png;
@@ -24,6 +24,23 @@ struct Vertex {
     g: u8,
     b: u8,
     a: u8,
+}
+
+impl Vertex {
+    fn new_with_xyz(x: f32, y: f32, z: f32) -> Self {
+        Vertex {
+            x: x,
+            y: y,
+            z: z,
+            nx: 0.0,
+            ny: 0.0,
+            nz: 1.0,
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+            a: 0xff,
+        }
+    }
 }
 
 impl ply::PropertyAccess for Vertex {
@@ -90,7 +107,7 @@ impl Rotor3 {
             yz: 0.0,
         }
     }
-    fn newFromVertToVert(a: Vertex, b: Vertex) -> Self{
+    fn new_from_vert_to_vert(a: Vertex, b: Vertex) -> Self{
         let bv: BiVec3 = outer3(&a, &b);
         let mut r =  Rotor3 {
             s: 1.0 + dot3(&a, &b),
@@ -110,6 +127,9 @@ impl Rotor3 {
         self.s /= length;
         self.xy /= length; self.xz /= length; self.yz /= length;
     }
+    //fn rotate(v: Vertex) -> Vertex {
+        //TODO!
+    //}
 }
 
 fn outer3 (a: &Vertex, b: &Vertex) -> BiVec3 {
@@ -147,6 +167,12 @@ fn main () {
             _ => panic!("Unexpeced element!"),
         }
     }   
+
+    // rotate
+    let v1 = Vertex::new_with_xyz(0.0, 0.0, 1.0);
+    let v2 = Vertex::new_with_xyz(0.0, 1.0, 0.0);
+    let r = Rotor3::new_from_vert_to_vert(v1, v2);
+    //TODO: implement Rotor3::rotate()
 
     //println!("vertices: {:#?}", vertices);
     
