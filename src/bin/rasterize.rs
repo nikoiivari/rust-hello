@@ -1,3 +1,6 @@
+#![allow(non_snake_case)]
+#![allow(dead_code)]
+
 extern crate ply_rs;
 extern crate png;
 
@@ -50,7 +53,7 @@ impl ply::PropertyAccess for Vertex {
             ("green", ply::Property::UChar(v)) => self.g = v,
             ("blue", ply::Property::UChar(v)) => self.b = v,
             ("alpha", ply::Property::UChar(v)) => self.a = v,
-            (k, _) => panic!("Vertex: Unexpected key/value combination: key: {}", k),
+            (k, _) => panic!("Vertex: Unexpected key/value: key: {}", k),
         }
     }
 }
@@ -71,13 +74,55 @@ impl BiVec3 {
     }
 }
 
-fn outer (a: Vertex, b: Vertex) -> BiVec3 {
+struct Rotor3 {
+    s: f32,
+    xy: f32,
+    xz: f32,
+    yz: f32,    
+}
+
+impl Rotor3 {
+    fn new() -> Self {
+        Rotor3 {
+            s: 0.0,
+            xy: 0.0,
+            xz: 0.0,
+            yz: 0.0,
+        }
+    }
+    fn newFromVertToVert(a: Vertex, b: Vertex) -> Self{
+        let bv: BiVec3 = outer3(&a, &b);
+        let mut r =  Rotor3 {
+            s: 1.0 + dot3(&a, &b),
+            xy: bv.xy,
+            xz: bv.xz,
+            yz: bv.yz,
+        };
+        r.normalize();
+        return r
+    }
+    fn normalize(&mut self) {
+        let lsqr: f32 = self.s * self.s + 
+                        self.xy * self.xy + 
+                        self.xz * self.xz + 
+                        self.yz * self.yz;
+        let length: f32 = lsqr.sqrt();
+        self.s /= length;
+        self.xy /= length; self.xz /= length; self.yz /= length;
+    }
+}
+
+fn outer3 (a: &Vertex, b: &Vertex) -> BiVec3 {
     let mut c =  BiVec3::new();
     c.xy = a.x * b.y - a.y * b.x;
     c.xz = a.x * b.z - a.z * b.x;
     c.yz = a.y * b.z - a.z * b.y;
 
     return c
+}
+
+fn dot3 (a: &Vertex, b: &Vertex) -> f32 {
+    return a.x*b.x + a.y*b.y + a.z*b.z
 }
 
 fn main () {
@@ -103,7 +148,7 @@ fn main () {
         }
     }   
 
-    println!("vertices: {:#?}", vertices);
+    //println!("vertices: {:#?}", vertices);
     
     let mut pixels: [u32; 65536] = [0; 65536]; // 256 x 256 = 65536 pixels
 
@@ -117,7 +162,8 @@ fn main () {
 
 }
 
-fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex], pixels: &mut [u32]) {
+fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex],
+                     pixels: &mut [u32]) {
     let xf = ((x as f32) / 128.0) - 1.0;
     let yf = ((y as f32) / 128.0) - 1.0;
 
