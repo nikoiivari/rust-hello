@@ -4,6 +4,7 @@
 extern crate ply_rs;
 extern crate png;
 
+use std::f32::consts::PI;
 use std::path::Path;
 use std::fs::File;
 use std::io::BufWriter;
@@ -109,13 +110,24 @@ impl Rotor3 {
         }
     }
     */
-    fn new_from_vert_to_vert(a: Vertex, b: Vertex) -> Self{
+    fn new_from_vert_to_vert(a: Vertex, b: Vertex) -> Self {
         let bv: BiVec3 = outer3(&a, &b);
         let mut r =  Rotor3 {
             s: 1.0 + dot3(&a, &b),
             xy: bv.xy,
             xz: bv.xz,
             yz: bv.yz,
+        };
+        r.normalize();
+        return r
+    }
+    fn new_from_angle_and_plane(angle: f32, plane: BiVec3) -> Self {
+        let sintmp: f32 = angle.sin() / 2.0;
+        let mut r = Rotor3 {
+            s: angle.cos() / 2.0,
+            xy: -sintmp * plane.xy,
+            xz: -sintmp * plane.xz,
+            yz: -sintmp * plane.yz,
         };
         r.normalize();
         return r
@@ -183,9 +195,11 @@ fn main () {
     // rotate
     let mut rotated_vertices = Vec::new();
     for vert in &vertices {
-        let v1 = Vertex::new_with_xyz(0.0, 0.0, 1.0);
-        let v2 = Vertex::new_with_xyz(0.0, 1.0, 0.0);
-        let rotor = Rotor3::new_from_vert_to_vert(v1, v2);
+        let v1 = Vertex::new_with_xyz(0.0, 1.0, 0.0);
+        let v2 = Vertex::new_with_xyz(0.0, 0.0, 1.0);
+        //let rotor = Rotor3::new_from_vert_to_vert(v1, v2);
+        let bv: BiVec3 = outer3(&v1,&v2);
+        let rotor = Rotor3::new_from_angle_and_plane(45f32 * (PI/180f32), bv);
         let rotated_vert: Vertex = rotor.rotate(&vert);
         rotated_vertices.push( rotated_vert );
     }
