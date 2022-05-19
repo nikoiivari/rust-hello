@@ -123,14 +123,14 @@ impl Rotor3 {
     }
     fn new_from_angle_and_plane(angle: f32, plane: BiVec3) -> Self {
         let sintmp: f32 = angle.sin() / 2.0;
-        let mut r = Rotor3 {
+        Rotor3 {
             s: angle.cos() / 2.0,
             xy: -sintmp * plane.xy,
             xz: -sintmp * plane.xz,
             yz: -sintmp * plane.yz,
-        };
-        r.normalize();
-        return r
+        }
+        //r.normalize();
+        //return r
     }
     fn normalize(&mut self) {
         let lsqr: f32 = self.s * self.s + 
@@ -195,11 +195,11 @@ fn main () {
     // rotate
     let mut rotated_vertices = Vec::new();
     for vert in &vertices {
-        let v1 = Vertex::new_with_xyz(0.0, 1.0, 0.0);
-        let v2 = Vertex::new_with_xyz(0.0, 0.0, 1.0);
-        //let rotor = Rotor3::new_from_vert_to_vert(v1, v2);
-        let bv: BiVec3 = outer3(&v1,&v2);
-        let rotor = Rotor3::new_from_angle_and_plane(45f32 * (PI/180f32), bv);
+        let v1 = Vertex::new_with_xyz(0.0, 0.707, 0.0);
+        let v2 = Vertex::new_with_xyz(0.0, 0.0, -0.707);
+        let rotor = Rotor3::new_from_vert_to_vert(v1, v2);
+        //let plane: BiVec3 = outer3(&v1,&v2);
+        //let rotor = Rotor3::new_from_angle_and_plane(45.0f32 * (PI/180.0f32), plane);
         let rotated_vert: Vertex = rotor.rotate(&vert);
         rotated_vertices.push( rotated_vert );
     }
