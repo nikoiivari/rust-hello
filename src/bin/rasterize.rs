@@ -160,7 +160,7 @@ fn dot3 (a: &Vertex, b: &Vertex) -> f32 {
 fn main () {
     
     //use ply_rs
-    let path = "VertexColorsTest.ply";
+    let path = "VertexPainCube.ply";
     let plyfile = std::fs::File::open(path).unwrap();
     let mut plyfile = BufReader::new(plyfile);
 
@@ -183,7 +183,7 @@ fn main () {
     // rotate
     let mut rotated_vertices = Vec::new();
     for vert in &vertices {
-        let v1 = Vertex::new_with_xyz(0.0, 0.0, -1.0);
+        let v1 = Vertex::new_with_xyz(0.0, 0.0, 1.0);
         let v2 = Vertex::new_with_xyz(0.0, 1.0, 0.0);
         let rotor = Rotor3::new_from_vert_to_vert(v1, v2);
         let rotated_vert: Vertex = rotor.rotate(&vert);
@@ -226,7 +226,7 @@ fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex],
 
     if z1st > -1.0 {
                 
-        pixels[(256*256) - (256 * (y as usize)) + (x as usize)] = z1stcolor;
+        pixels[(256*256) - (256 * (y as usize)) + (x as usize)-1] = z1stcolor;
         
     }
 }
