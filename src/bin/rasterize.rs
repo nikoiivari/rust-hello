@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 extern crate ply_rs;
 extern crate png;
 
@@ -81,11 +82,11 @@ struct BiVec3 {
 }
 
 impl BiVec3 {
-    fn new() -> Self {
+    fn new(xy: f32, xz: f32, yz: f32) -> Self {
         BiVec3 {
-            xy: 0.0,
-            xz: 0.0,
-            yz: 0.0,
+            xy: xy,
+            xz: xz,
+            yz: yz,
         }
     }
 }
@@ -119,7 +120,14 @@ impl Rotor3 {
         r.normalize();
         return r
     }
-
+    fn new_from_angle_and_plane(plane: BiVec3, angle_rad: f32) -> Self {
+        Rotor3 {
+            s: (angle_rad / 2.0).cos(),
+            xy: -(angle_rad / 2.0).sin() * plane.xy,
+            xz: -(angle_rad / 2.0).sin() * plane.xz,
+            yz: -(angle_rad / 2.0).sin() * plane.yz,
+        }
+    }
     fn normalize(&mut self) {
         let lsqr: f32 = self.s * self.s + 
                         self.xy * self.xy + 
@@ -145,7 +153,7 @@ impl Rotor3 {
 }
 
 fn outer3 (a: &Vertex, b: &Vertex) -> BiVec3 {
-    let mut c =  BiVec3::new();
+    let mut c =  BiVec3::new(0.0, 0.0, 0.0);
     c.xy = a.x * b.y - a.y * b.x;
     c.xz = a.x * b.z - a.z * b.x;
     c.yz = a.y * b.z - a.z * b.y;
@@ -193,12 +201,16 @@ fn main () {
     // rotate
     let mut rotated_vertices = Vec::new();
     for vert in &vertices {
-        let v1 = Vertex::new_with_xyz(0.0, 0.707, 0.0);
-        let v2 = Vertex::new_with_xyz(0.0, 0.0, -0.707);
-        let rotor = Rotor3::new_from_vert_to_vert(v1, v2);
-        //let plane: BiVec3 = outer3(&v1,&v2);
-        //let rotor = Rotor3::new_from_angle_and_plane(45.0f32 * (PI/180.0f32), plane);
-        let rotated_vert: Vertex = rotor.rotate(&vert);
+        //let v1 = Vertex::new_with_xyz(0.0, 0.707, 0.0);
+        //let v2 = Vertex::new_with_xyz(0.0, 0.0, -0.707);
+        //let rotor = Rotor3::new_from_vert_to_vert(v1, v2);
+        let plane1: BiVec3 = BiVec3::new(0.0, 1.0, 0.0);
+        let rotor1 = Rotor3::new_from_angle_and_plane(plane1, 45.0f32 * (PI/180.0f32));
+        let plane2: BiVec3 = BiVec3::new(0.0, 0.0, 1.0);
+        let rotor2 = Rotor3::new_from_angle_and_plane(plane2, 45.0f32 * (PI/180.0f32));
+        //rotate rotor with rotor
+        let rotor3: Rotor3 = 
+        let rotated_vert: Vertex = rotor3.rotate(&vert);
         rotated_vertices.push( rotated_vert );
     }
 
