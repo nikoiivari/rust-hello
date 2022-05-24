@@ -1,10 +1,8 @@
-//#![allow(non_snake_case)]
-//#![allow(dead_code)]
-
 extern crate ply_rs;
 extern crate png;
 
 use std::f32::consts::PI;
+use std::env;
 use std::path::Path;
 use std::fs::File;
 use std::io::BufWriter;
@@ -121,17 +119,7 @@ impl Rotor3 {
         r.normalize();
         return r
     }
-    fn new_from_angle_and_plane(angle: f32, plane: BiVec3) -> Self {
-        let sintmp: f32 = angle.sin() / 2.0;
-        Rotor3 {
-            s: angle.cos() / 2.0,
-            xy: -sintmp * plane.xy,
-            xz: -sintmp * plane.xz,
-            yz: -sintmp * plane.yz,
-        }
-        //r.normalize();
-        //return r
-    }
+
     fn normalize(&mut self) {
         let lsqr: f32 = self.s * self.s + 
                         self.xy * self.xy + 
@@ -171,8 +159,18 @@ fn dot3 (a: &Vertex, b: &Vertex) -> f32 {
 
 fn main () {
     
+    //commandline args
+    let args: Vec<String> = env::args().collect();
+    //println!("{:?}", args);
+    let foldername = &args[1];
+    let angle_s = &args[2];
+    let angle = angle_s.parse::<f32>().unwrap();
+    let directions_s = &args[3];
+    let directions = directions_s.parse::<i32>().unwrap();
+    
+
     //use ply_rs
-    let path = "VertexPainCube.ply";
+    let path = foldername.to_owned() + "/" + foldername + ".ply";
     let plyfile = std::fs::File::open(path).unwrap();
     let mut plyfile = BufReader::new(plyfile);
 
