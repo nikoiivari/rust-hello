@@ -210,9 +210,9 @@ fn main () {
     let mut rotated_vertices = Vec::new();
     for vert in &vertices {
         let plane1: BiVec3 = BiVec3::new(0.0, 1.0, 0.0);
-        let rotor1 = Rotor3::new_from_angle_and_plane(plane1, 45.0f32 * (PI/180.0f32));
+        let rotor1 = Rotor3::new_from_angle_and_plane(plane1, 360.0/(directions as f32) * (PI/180.0f32));
         let plane2: BiVec3 = BiVec3::new(0.0, 0.0, 1.0);
-        let rotor2 = Rotor3::new_from_angle_and_plane(plane2, 45.0f32 * (PI/180.0f32));
+        let rotor2 = Rotor3::new_from_angle_and_plane(plane2, angle * (PI/180.0f32));
         //rotate rotor with rotor
         let rotor3: Rotor3 = rotor2.multiply(rotor1);
         let rotated_vert: Vertex = rotor3.rotate(&vert);
