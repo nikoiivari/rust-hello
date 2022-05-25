@@ -209,9 +209,6 @@ fn main () {
     // rotate
     let mut rotated_vertices = Vec::new();
     for vert in &vertices {
-        //let v1 = Vertex::new_with_xyz(0.0, 0.707, 0.0);
-        //let v2 = Vertex::new_with_xyz(0.0, 0.0, -0.707);
-        //let rotor = Rotor3::new_from_vert_to_vert(v1, v2);
         let plane1: BiVec3 = BiVec3::new(0.0, 1.0, 0.0);
         let rotor1 = Rotor3::new_from_angle_and_plane(plane1, 45.0f32 * (PI/180.0f32));
         let plane2: BiVec3 = BiVec3::new(0.0, 0.0, 1.0);
@@ -222,13 +219,11 @@ fn main () {
         rotated_vertices.push( rotated_vert );
     }
 
-    //println!("vertices: {:#?}", vertices);
-    
     let mut pixels: [u32; 65536] = [0; 65536]; // 256 x 256 = 65536 pixels
 
     for y in 0..=255 {
         for x  in 0..=255 {
-            pixel_sample_ply(x, y, 0.05, &rotated_vertices, &mut pixels);
+            pixel_sample_ply(x, y, 0.025, &rotated_vertices, &mut pixels);
         }
     }
 
