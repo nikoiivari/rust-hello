@@ -137,6 +137,14 @@ impl Rotor3 {
         self.s /= length;
         self.xy /= length; self.xz /= length; self.yz /= length;
     }
+    fn multiply(self, m: Rotor3) -> Self {
+        Rotor3 {
+            s: self.s * m.s - self.xy * m.xy - self.xz * m.xz - self.yz * m.yz,
+            xy: self.xy * m.s + self.s * m.xy + self.yz * m.xz - self.xz * m.yz,
+            xz: self.xz * m.s + self.s * m.xz - self.yz * m.xy + self.xy * m.yz,
+            yz: self.yz * m.s + self.s * m.yz + self.xz * m.xy - self.xy * m.xz,
+        }
+    }
     fn rotate(self, v: &Vertex) -> Vertex {
         let tmp_x: f32 = self.s * v.x + v.y * self.xy + v.z * self.xz;
         let tmp_y: f32 = self.s * v.y - v.x * self.xy + v.z * self.yz;
@@ -209,7 +217,7 @@ fn main () {
         let plane2: BiVec3 = BiVec3::new(0.0, 0.0, 1.0);
         let rotor2 = Rotor3::new_from_angle_and_plane(plane2, 45.0f32 * (PI/180.0f32));
         //rotate rotor with rotor
-        let rotor3: Rotor3 = 
+        let rotor3: Rotor3 = rotor2.multiply(rotor1);
         let rotated_vert: Vertex = rotor3.rotate(&vert);
         rotated_vertices.push( rotated_vert );
     }
