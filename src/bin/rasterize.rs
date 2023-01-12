@@ -182,11 +182,13 @@ fn main () {
     let angle_s = &args[2];
     let angle = angle_s.parse::<f32>().unwrap();
     let directions_s = &args[3];
+    let dir_offset_s = &args[4];
+    let frame_name_s = &args[5];
     let directions = directions_s.parse::<i32>().unwrap();
+    let dir_offset = dir_offset_s.parse::<i32>().unwrap();
     
-
     //use ply_rs
-    let path = foldername.to_owned() + "/" + foldername + ".ply";
+    let path = foldername.to_owned() + "/" + frame_name_s + ".ply";
     let plyfile = std::fs::File::open(path).unwrap();
     let mut plyfile = BufReader::new(plyfile);
 
@@ -204,31 +206,39 @@ fn main () {
             "face" => {},
             _ => panic!("Unexpeced element!"),
         }
-    }   
-
-    // rotate
-    let mut rotated_vertices = Vec::new();
-    for vert in &vertices {
-        let plane1: BiVec3 = BiVec3::new(0.0, 1.0, 0.0);
-        let rotor1 = Rotor3::new_from_angle_and_plane(plane1, 360.0/(directions as f32) * (PI/180.0f32));
-        let plane2: BiVec3 = BiVec3::new(0.0, 0.0, 1.0);
-        let rotor2 = Rotor3::new_from_angle_and_plane(plane2, angle * (PI/180.0f32));
-        //rotate rotor with rotor
-        let rotor3: Rotor3 = rotor2.multiply(rotor1);
-        let rotated_vert: Vertex = rotor3.rotate(&vert);
-        rotated_vertices.push( rotated_vert );
     }
 
-    let mut pixels: [u32; 65536] = [0; 65536]; // 256 x 256 = 65536 pixels
-
-    for y in 0..=255 {
-        for x  in 0..=255 {
-            pixel_sample_ply(x, y, 0.025, &rotated_vertices, &mut pixels);
+        
+    for i in 0..directions {
+        // prepare angles
+        let dir_angle = (i * (360/directions))+dir_offset;
+        // rotate
+        let mut rotated_vertices = Vec::new();
+        for vert in &vertices {
+            let plane1: BiVec3 = BiVec3::new(0.0, 1.0, 0.0);
+            let rotor1 = Rotor3::new_from_angle_and_plane(plane1, (dir_angle as f32) * (PI/180.0f32));
+            let plane2: BiVec3 = BiVec3::new(0.0, 0.0, 1.0);
+            let rotor2 = Rotor3::new_from_angle_and_plane(plane2, angle * (PI/180.0f32));
+            //rotate rotor with rotor
+            let rotor3: Rotor3 = rotor2.multiply(rotor1);
+            let rotated_vert: Vertex = rotor3.rotate(&vert);
+            rotated_vertices.push( rotated_vert );
         }
+
+
+        let mut pixels: [u32; 65536] = [0; 65536]; // 256 x 256 = 65536 pixels
+
+        for y in 0..=255 {
+            for x  in 0..=255 {
+                pixel_sample_ply(x, y, 0.025, &rotated_vertices, &mut pixels);
+            }
+        }
+
+        // write png with frame name and direction angle
+        let outpath = foldername.to_owned() + "/" + frame_name_s + &dir_angle.to_string() + ".png";
+        println!("direction {:?}", outpath);
+        write_png(&mut pixels, outpath);
     }
-
-    write_png(&mut pixels);
-
 }
 
 fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex],
@@ -258,14 +268,14 @@ fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex],
     }
 }
 
-fn write_png (pixels: &mut[u32]) {
+fn write_png (pixels: &mut[u32], path: String) {
     //convert to byte array    
     let mut bytes = Vec::<u8>::new();
     for val in pixels{
         bytes.extend_from_slice(&val.to_be_bytes());
     }
 
-    let path = Path::new(r"raster.png");
+    //let path = Path::new(r"raster.png");
     let file = File::create(path).unwrap();
     let ref mut w = BufWriter::new(file);
 
