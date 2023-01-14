@@ -10,7 +10,7 @@ niiden paksuiksi paisutetut verteksit .PNG-kuvaksi. Tukee verteksivärejä.
 
 ![Rasteroidut verteksit](https://raw.githubusercontent.com/nikoiivari/rust-hello/main/raster.png)
 
-Komentoriviltä luetaan projektikansio, kuvakulma yläviistosta (45 astetta) ja kuinka monesta kuvakulmasta objekti rasteroidaan (360-astetta jaetaan 8 osaan). Lisäksi offset ensimmäisen kuvan kulmalle on 0 astetta. Seuraava parametri on skaala (scale 1.0) joka käytännössä pienentää objektin kokoa spritellä mitä suurempi arvo annetaan. Tämän jälkeen annetaan pystysuunnan offset (vertical offset). Lopuksi animaatio framen nimi.
+Komentoriviltä luetaan projektikansio, kuvakulma yläviistosta (45 astetta) ja kuinka monesta kuvakulmasta objekti rasteroidaan (360-astetta jaetaan 8 osaan). Lisäksi offset ensimmäisen kuvan kulmalle on 0 astetta. Seuraava parametri on skaala (scale 1.0) joka käytännössä pienentää objektin kokoa spritellä mitä suurempi arvo annetaan. Tämän jälkeen annetaan pystysuunnan offset (vertical offset -1.0 .. 1.0). Lopuksi animaatio framen nimi.
 
 `rasterize VertexPainCube 45 8 0 1.0 0.0 VertexPainCube`
 
