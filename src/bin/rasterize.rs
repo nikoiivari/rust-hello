@@ -183,9 +183,11 @@ fn main () {
     let angle = angle_s.parse::<f32>().unwrap();
     let directions_s = &args[3];
     let dir_offset_s = &args[4];
-    let frame_name_s = &args[5];
+    let scale_s = &args[5];
+    let frame_name_s = &args[6];
     let directions = directions_s.parse::<i32>().unwrap();
     let dir_offset = dir_offset_s.parse::<i32>().unwrap();
+    let scale = scale_s.parse::<f32>().unwrap();
     
     //use ply_rs
     let path = foldername.to_owned() + "/" + frame_name_s + ".ply";
@@ -230,23 +232,23 @@ fn main () {
 
         for y in 0..=255 {
             for x  in 0..=255 {
-                pixel_sample_ply(x, y, 0.025, &rotated_vertices, &mut pixels);
+                pixel_sample_ply(x, y, 0.025, &rotated_vertices, scale, &mut pixels);
             }
         }
 
         // write png with frame name and direction angle
-        let outpath = foldername.to_owned() + "/" + frame_name_s + &dir_angle.to_string() + ".png";
+        let outpath = foldername.to_owned() + "/" + frame_name_s + "_" + &dir_angle.to_string() + ".png";
         println!("direction {:?}", outpath);
         write_png(&mut pixels, outpath);
     }
 }
 
 fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex],
-                     pixels: &mut [u32]) {
-    let xf = ((x as f32) / 128.0) - 1.0;
-    let yf = ((y as f32) / 128.0) - 1.0;
+                     scale: f32, pixels: &mut [u32]) {
+    let xf = (((x as f32) / 128.0) - 1.0) * scale;
+    let yf = (((y as f32) / 128.0) - 1.0) * scale;
 
-    let mut z1st: f32 = -2.01;
+    let mut z1st: f32 = -scale; //-2.01
     let mut z1stcolor: u32 = 0x000000ff;
     
     for vert in verts {
@@ -261,9 +263,9 @@ fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex],
         }   
     }
 
-    if z1st > -1.0 {
+    if z1st > -scale { //-1.0
                 
-        pixels[(256*256) - (256 * (y as usize)) + (x as usize)-1] = z1stcolor;
+        pixels[(256*256-1) - (256 * (y as usize)) + (x as usize)-1] = z1stcolor;
         
     }
 }
