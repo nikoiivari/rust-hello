@@ -184,11 +184,13 @@ fn main () {
     let directions_s = &args[3];
     let dir_offset_s = &args[4];
     let scale_s = &args[5];
-    let frame_name_s = &args[6];
+    let vertical_s = &args[6];
+    let frame_name_s = &args[7];
     let directions = directions_s.parse::<i32>().unwrap();
     let dir_offset = dir_offset_s.parse::<i32>().unwrap();
     let scale = scale_s.parse::<f32>().unwrap();
-    
+    let vertical = vertical_s.parse::<f32>().unwrap();
+
     //use ply_rs
     let path = foldername.to_owned() + "/" + frame_name_s + ".ply";
     let plyfile = std::fs::File::open(path).unwrap();
@@ -232,7 +234,7 @@ fn main () {
 
         for y in 0..=255 {
             for x  in 0..=255 {
-                pixel_sample_ply(x, y, 0.025, &rotated_vertices, scale, &mut pixels);
+                pixel_sample_ply(x, y, 0.025, &rotated_vertices, scale, vertical, &mut pixels);
             }
         }
 
@@ -244,9 +246,9 @@ fn main () {
 }
 
 fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex],
-                     scale: f32, pixels: &mut [u32]) {
+                     scale: f32, vertical: f32, pixels: &mut [u32]) {
     let xf = (((x as f32) / 128.0) - 1.0) * scale;
-    let yf = (((y as f32) / 128.0) - 1.0) * scale;
+    let yf = (((y as f32) / 128.0) - (1.0 + vertical)) * scale;
 
     let mut z1st: f32 = -scale; //-2.01
     let mut z1stcolor: u32 = 0x000000ff;
