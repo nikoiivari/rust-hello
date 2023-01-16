@@ -41,6 +41,31 @@ impl Vertex {
             a: 0xff,
         }
     }
+
+    fn new_with_xyz_nxnynz(x: f32, y: f32, z: f32, nx: f32, ny: f32, nz: f32) -> Self {
+        Vertex {
+            x: x,
+            y: y,
+            z: z,
+            nx: nx,
+            ny: ny,
+            nz: nz,
+            r: 0x0,
+            g: 0x0,
+            b: 0x0,
+            a: 0xff,
+        }
+    }
+
+    fn shade(&mut self, light: Vertex) {
+        let mut d: f32 = self.nx * light.x + self.ny * light.y + self.nz * light.z; //dot prod.
+        if d > 1.0 {d=1.0};
+        if d < 0.0 {d=0.0};
+        self.r = ((self.r as f32) * d) as u8;
+        self.g = ((self.g as f32) * d) as u8;
+        self.b = ((self.b as f32) * d) as u8;
+        //self.a = (d * 255.0) as u8;
+    }
 }
 
 impl ply::PropertyAccess for Vertex {
@@ -146,6 +171,7 @@ impl Rotor3 {
         }
     }
     fn rotate(self, v: &Vertex) -> Vertex {
+        // rotate xyz
         let tmp_x: f32 = self.s * v.x + v.y * self.xy + v.z * self.xz;
         let tmp_y: f32 = self.s * v.y - v.x * self.xy + v.z * self.yz;
         let tmp_z: f32 = self.s * v.z - v.x * self.xz - v.y * self.yz;
@@ -153,11 +179,27 @@ impl Rotor3 {
         let r_x: f32 = self.s * tmp_x + tmp_y * self.xy + tmp_z * self.xz + tri   * self.yz;
         let r_y: f32 = self.s * tmp_y - tmp_x * self.xy - tri   * self.xz + tmp_z * self.yz;
         let r_z: f32 = self.s * tmp_z + tri   * self.xy - tmp_x * self.xz - tmp_y * self.yz;
-        let mut vert: Vertex = Vertex::new_with_xyz(r_x, r_y, r_z);
-        vert.nx = v.nx; vert.ny = v.ny; vert.nz = v.nz;
+        //let mut vert: Vertex = Vertex::new_with_xyz(r_x, r_y, r_z);
+                
+        // rotate normal
+        let tmpn_x: f32 = self.s * v.nx + v.ny * self.xy + v.nz * self.xz;
+        let tmpn_y: f32 = self.s * v.ny - v.nx * self.xy + v.nz * self.yz;
+        let tmpn_z: f32 = self.s * v.nz - v.nx * self.xz - v.ny * self.yz;
+        let trin: f32 = v.nx * self.yz - v.ny * self.xz + v.nz * self.xy;
+        let r_nx: f32 = self.s * tmpn_x + tmpn_y * self.xy + tmpn_z * self.xz + trin   * self.yz;
+        let r_ny: f32 = self.s * tmpn_y - tmpn_x * self.xy - trin   * self.xz + tmpn_z * self.yz;
+        let r_nz: f32 = self.s * tmpn_z + trin   * self.xy - tmpn_x * self.xz - tmpn_y * self.yz;
+        let mut vert: Vertex = Vertex::new_with_xyz_nxnynz(r_x, r_y, r_z, r_nx, r_ny, r_nz);
+        // vert.nx = v.nx; vert.ny = v.ny; vert.nz = v.nz;
         vert.r = v.r; vert.g = v.g; vert.b = v.b; vert.a = v.a;
         return vert
     }
+    //fn rotate_normal(self, v: &Vertex) -> Vertex {
+
+        //vert.x = v.x; vert.y = v.y; vert.z = v.z;
+        //vert.r = v.r; vert.g = v.g; vert.b = v.b; vert.a = v.a;
+        //return vert
+    //}
 }
 
 fn outer3 (a: &Vertex, b: &Vertex) -> BiVec3 {
@@ -223,9 +265,12 @@ fn main () {
             let rotor1 = Rotor3::new_from_angle_and_plane(plane1, (dir_angle as f32) * (PI/180.0f32));
             let plane2: BiVec3 = BiVec3::new(0.0, 0.0, 1.0);
             let rotor2 = Rotor3::new_from_angle_and_plane(plane2, angle * (PI/180.0f32));
-            //rotate rotor with rotor
+            // rotate rotor with rotor
             let rotor3: Rotor3 = rotor2.multiply(rotor1);
-            let rotated_vert: Vertex = rotor3.rotate(&vert);
+            let mut rotated_vert: Vertex = rotor3.rotate(&vert);
+            // lighting
+            let light: Vertex = Vertex::new_with_xyz(0.0, -1.0, 0.0);
+            rotated_vert.shade(light);
             rotated_vertices.push( rotated_vert );
         }
 
