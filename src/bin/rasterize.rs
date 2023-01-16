@@ -65,14 +65,19 @@ impl Vertex {
         self.nz = self.nz * (1.0 / len);
     }
 
-    fn shade(&mut self, light: Vertex) {
+    fn shade(&mut self, light: Vertex, diffuse: u32, ambient: u32) {
         self.normalize_normal();
         let mut d: f32 = self.nx * light.x + self.ny * light.y + self.nz * light.z; //dot prod.
         if d > 1.0 {d=1.0};
-        if d < 0.0 {d=0.0};
-        let mut rd = (self.r as f32) * d +64.0; if rd > 255.0 {rd = 255.0};
-        let mut gr = (self.g as f32) * d +64.0; if gr > 255.0 {gr = 255.0};
-        let mut bl = (self.b as f32) * d +64.0; if bl > 255.0 {bl = 255.0};
+        let difr = (diffuse >> 24) as f32;
+        let difg = (diffuse >> 16 & 0x000000ff) as f32;
+        let difb = (diffuse >> 8  & 0x000000ff) as f32;
+        let ambr = (ambient >> 24) as f32;
+        let ambg = (ambient >> 16 & 0x000000ff) as f32;
+        let ambb = (ambient >> 8  & 0x000000ff) as f32;
+        let mut rd = ((self.r as f32) + difr) * d + ambr; if rd > 255.0 {rd = 255.0};
+        let mut gr = ((self.g as f32) + difg) * d + ambg; if gr > 255.0 {gr = 255.0};
+        let mut bl = ((self.b as f32) + difb) * d + ambb; if bl > 255.0 {bl = 255.0};
         self.r = rd as u8;
         self.g = gr as u8;
         self.b = bl as u8;
@@ -282,7 +287,7 @@ fn main () {
             let mut rotated_vert: Vertex = rotor3.rotate(&vert);
             // lighting
             let light: Vertex = Vertex::new_with_xyz(0.0, 1.0, 0.0);
-            rotated_vert.shade(light);
+            rotated_vert.shade(light, 0xffeeeeff, 0x441111ff);
             rotated_vertices.push( rotated_vert );
         }
 
