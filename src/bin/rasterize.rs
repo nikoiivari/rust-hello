@@ -2,6 +2,7 @@
 extern crate ply_rs;
 extern crate png;
 
+use std::f32;
 use std::f32::consts::PI;
 use std::env;
 use std::path::Path;
@@ -57,14 +58,21 @@ impl Vertex {
         }
     }
 
+    fn normalize_normal(&mut self) {
+        let len: f32  = f32::sqrt(self.nx * self.nx + self.ny * self.ny + self.nz * self.nz);
+        self.nx = self.nx * (1.0 / len);
+        self.ny = self.ny * (1.0 / len);
+        self.nz = self.nz * (1.0 / len);
+    }
+
     fn shade(&mut self, light: Vertex) {
+        self.normalize_normal();
         let mut d: f32 = self.nx * light.x + self.ny * light.y + self.nz * light.z; //dot prod.
         if d > 1.0 {d=1.0};
         if d < 0.0 {d=0.0};
         self.r = ((self.r as f32) * d) as u8;
         self.g = ((self.g as f32) * d) as u8;
         self.b = ((self.b as f32) * d) as u8;
-        //self.a = (d * 255.0) as u8;
     }
 }
 
@@ -214,6 +222,7 @@ fn outer3 (a: &Vertex, b: &Vertex) -> BiVec3 {
 fn dot3 (a: &Vertex, b: &Vertex) -> f32 {
     return a.x*b.x + a.y*b.y + a.z*b.z
 }
+
 
 fn main () {
     
