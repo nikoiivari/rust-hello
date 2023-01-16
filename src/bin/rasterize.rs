@@ -70,9 +70,12 @@ impl Vertex {
         let mut d: f32 = self.nx * light.x + self.ny * light.y + self.nz * light.z; //dot prod.
         if d > 1.0 {d=1.0};
         if d < 0.0 {d=0.0};
-        self.r = ((self.r as f32) * d) as u8;
-        self.g = ((self.g as f32) * d) as u8;
-        self.b = ((self.b as f32) * d) as u8;
+        let mut rd = (self.r as f32) * d +64.0; if rd > 255.0 {rd = 255.0};
+        let mut gr = (self.g as f32) * d +64.0; if gr > 255.0 {gr = 255.0};
+        let mut bl = (self.b as f32) * d +64.0; if bl > 255.0 {bl = 255.0};
+        self.r = rd as u8;
+        self.g = gr as u8;
+        self.b = bl as u8;
     }
 }
 
@@ -278,7 +281,7 @@ fn main () {
             let rotor3: Rotor3 = rotor2.multiply(rotor1);
             let mut rotated_vert: Vertex = rotor3.rotate(&vert);
             // lighting
-            let light: Vertex = Vertex::new_with_xyz(0.0, -1.0, 0.0);
+            let light: Vertex = Vertex::new_with_xyz(0.0, 1.0, 0.0);
             rotated_vert.shade(light);
             rotated_vertices.push( rotated_vert );
         }
