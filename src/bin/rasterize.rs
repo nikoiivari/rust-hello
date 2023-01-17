@@ -2,6 +2,7 @@
 extern crate ply_rs;
 extern crate png;
 
+use std::u32;
 use std::f32;
 use std::f32::consts::PI;
 use std::env;
@@ -244,11 +245,21 @@ fn main () {
     let dir_offset_s = &args[4];
     let scale_s = &args[5];
     let vertical_s = &args[6];
-    let frame_name_s = &args[7];
+    let light_ew_s = &args[7];
+    let light_ns_s = &args[8];
+    let diffuse_s = &args[9];
+    let ambient_s = &args[10];
+    let frame_name_s = &args[11];
+
     let directions = directions_s.parse::<i32>().unwrap();
     let dir_offset = dir_offset_s.parse::<i32>().unwrap();
     let scale = scale_s.parse::<f32>().unwrap();
     let vertical = vertical_s.parse::<f32>().unwrap();
+    let light_ew = light_ew_s.parse::<f32>().unwrap();
+    let light_ns = light_ns_s.parse::<f32>().unwrap();
+
+    let diffuse = u32::from_str_radix(diffuse_s.trim_start_matches("0x"), 16).unwrap();
+    let ambient = u32::from_str_radix(ambient_s.trim_start_matches("0x"), 16).unwrap();
 
     //use ply_rs
     let path = foldername.to_owned() + "/" + frame_name_s + ".ply";
@@ -282,12 +293,18 @@ fn main () {
             let rotor1 = Rotor3::new_from_angle_and_plane(plane1, (dir_angle as f32) * (PI/180.0f32));
             let plane2: BiVec3 = BiVec3::new(0.0, 0.0, 1.0);
             let rotor2 = Rotor3::new_from_angle_and_plane(plane2, angle * (PI/180.0f32));
-            // rotate rotor with rotor
+            // rotate vertex
             let rotor3: Rotor3 = rotor2.multiply(rotor1);
             let mut rotated_vert: Vertex = rotor3.rotate(&vert);
             // lighting
-            let light: Vertex = Vertex::new_with_xyz(0.0, 1.0, 0.0);
-            rotated_vert.shade(light, 0xffeeeeff, 0x441111ff);
+            let light_from_up: Vertex = Vertex::new_with_xyz(0.0, 1.0, 0.0);
+            let lp1: BiVec3 = BiVec3::new(0.0, 0.0, 1.0);
+            let rot1 = Rotor3::new_from_angle_and_plane(lp1, light_ns * (PI/180.0f32));
+            let lp2: BiVec3 = BiVec3::new(1.0, 0.0, 0.0);
+            let rot2 = Rotor3::new_from_angle_and_plane(lp2, light_ew * (PI/180.0f32));
+            let rot3: Rotor3 = rot2.multiply(rot1);
+            let light: Vertex = rot3.rotate(&light_from_up);
+            rotated_vert.shade(light, diffuse, ambient);
             rotated_vertices.push( rotated_vert );
         }
 
