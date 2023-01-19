@@ -4,7 +4,146 @@ use std::fs::File;
 use std::io::BufWriter;
 //use std::io::BufReader;
 use std::path::Path;
- 
+use std::ops;
+
+#[derive(Copy, Clone)]
+struct Vec3 {
+    x: f32,
+    y: f32,
+    z: f32,
+}
+
+impl Vec3 {
+    fn new_with_xyz(x: f32, y: f32, z: f32) -> Self {
+        Vec3 {
+            x: x,
+            y: y,
+            z: z, 
+        }
+    }
+    fn new_origo() -> Self {
+        Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0, 
+        }
+    }
+    fn length(&self) -> f32 {
+        let len: f32  = f32::sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
+        len
+    }
+}
+
+impl ops::Add<Vec3> for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, other: Vec3) -> Vec3 {
+        // add self + other = result
+        Vec3 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+
+impl ops::Sub<Vec3> for Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, other: Vec3) -> Vec3 {
+        // sub self - other = result
+        Vec3 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
+    }
+}
+
+struct Intersection {
+    xyz: Vec3,
+    normal: Vec3,
+    rgb: Vec3,
+    happened: bool,
+}
+
+impl Intersection {
+    fn new_with_xyz_normal_rgb(xyz: Vec3, normal: Vec3, rgb: Vec3) -> Self {
+        Intersection {
+            xyz: xyz,
+            normal: normal,
+            rgb: rgb,
+            happened: true,
+        }
+    }
+    fn new_did_not_happen() -> Self {
+        let meh1: Vec3 = Vec3::new_origo();
+        let meh2: Vec3 = Vec3::new_origo();
+        let meh3: Vec3 = Vec3::new_origo();
+        Intersection {
+            xyz: meh1,
+            normal: meh2,
+            rgb: meh3,
+            happened: false,
+        }
+    }
+}
+
+struct Sphere {
+    xyz: Vec3,
+    radius: f32,
+    rgb: Vec3,
+}
+
+impl Sphere {
+    fn new_with_xyz_radius_rgb(xyz: Vec3, radius: f32, rgb: Vec3) -> Self {
+        Sphere {
+            xyz: xyz,
+            radius: radius,
+            rgb: rgb,
+        }
+    }
+
+    fn ray_intersection(self, origin: Vec3, destination: Vec3) -> Intersection {
+        // https://www.ccs.neu.edu/home/fell/CS4300/Lectures/Ray-TracingFormulas.pdf
+        let d: Vec3 =  destination - origin;
+        
+        let a: f32 = d.x*d.x + d.y*d.y + d.z*d.z;
+        let b: f32 = 2.0*d.x*(origin.x - self.xyz.x) + 
+                     2.0*d.y*(origin.y - self.xyz.y) + 
+                     2.0*d.z*(origin.z - self.xyz.z);
+        let c: f32 = self.xyz.x * self.xyz.x + self.xyz.y * self.xyz.y + self.xyz.z * self.xyz.z +
+                     origin.x * origin.x + origin.y * origin.y + origin.z * origin.z +
+                     -2.0*(self.xyz.x*origin.x + self.xyz.y*origin.y + self.xyz.z*origin.z) - 
+                     self.radius*self.radius;
+                
+        let discriminant: f32 = b*b - 4.0*a*c;
+        if discriminant <= 0.0 {
+            let inters: Intersection = Intersection::new_did_not_happen();
+            return inters;
+        }
+
+        // find distance to nearest intersection
+        let t: f32 = (-b - f32::sqrt(b*b - 4.0*a*c))/(2.0*a);
+        // find coordinates to intersection point
+        let int_p: Vec3 = Vec3 {
+            x: origin.x + t*d.x,
+            y: origin.y + t*d.y,
+            z: origin.z + t*d.z,
+        };
+        // FIXME!!!! normal and rgb
+        let int_n: Vec3 = Vec3::new_origo();
+        let int_rgb: Vec3 = Vec3::new_origo();
+        let inters: Intersection = Intersection::new_with_xyz_normal_rgb(int_p, int_n, int_rgb);
+        
+        inters
+    }
+}
+
+fn dot3 (a: &Vec3, b: &Vec3) -> f32 {
+    return a.x*b.x + a.y*b.y + a.z*b.z
+}
+
 fn main() {
     //let slso: [u32; 8] = [0x0d2b45, 0x203c56, 0x544e68, 0x8d697a, 
     //                      0xd08159, 0xffaa5e, 0xffd4a3, 0xffecd6];
@@ -14,23 +153,6 @@ fn main() {
     write_png (&mut pixels, path)
 
 }
-
-// fn map_to_palette (pixels: &mut [u32], pal: [u32], num_colors: u32, in_pixels: &mut [u32]) {
-
-//}
-
-//fn fill_tile_gradient (pixels: &mut [u32]) {
-    // fill tile with horisontal gradient
-    //println!("range {:?}", (256/16);
-    // tileline
-    //for tilex: u8 in 0..15{
-    //    for j: u8 in 0..15{
-    //        pixels[(tilex*16)+j] = 0xa + j*4;
-    //    }
-    //}
-//}
-
-
 
 fn write_png (pixels: &mut[u32], path: &Path) {
     //convert to byte array    
