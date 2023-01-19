@@ -234,7 +234,23 @@ fn dot3 (a: &Vertex, b: &Vertex) -> f32 {
 
 
 fn main () {
-    
+    // 64 color palette, adapted from DB32
+    let _pal64: [u32; 64] = [0x000000ff, 0x222034ff, 0x45283cff, 0x663931ff, 
+                            0x8f563bff, 0xdf7126ff, 0xd9a066ff, 0xeec39aff,
+                            0xfbf236ff, 0x99e550ff, 0x6abe30ff, 0x37946eff,
+                            0x4b692fff, 0x524b24ff, 0x323c39ff, 0x3f3f74ff,
+                            0x306082ff, 0x5b6ee1ff, 0x639bffff, 0x5fcde4ff,
+                            0xcbdbfcff, 0xffffffff, 0x9badb7ff, 0x847e87ff,
+                            0x696a6aff, 0x595652ff, 0x76428aff, 0xac3232ff,
+                            0xd95763ff, 0xd77bbaff, 0x8f974aff, 0x8a6f30ff,
+                            0x02137eff, 0x1032ffff, 0x1651bbff, 0x3cb0c8ff,
+                            0xc27600ff, 0xffc363ff, 0xad5132ff, 0xff9b00ff,
+                            0xff6d33ff, 0xb97a60ff, 0xa88a5eff, 0xf3eba5ff,
+                            0x28240aff, 0x374a0fff, 0x5b7d73ff, 0x22370eff,
+                            0x393413ff, 0x1f2121ff, 0x513940ff, 0x471927ff,
+                            0x322d26ff, 0xab00d3ff, 0xc10000ff, 0x7a3045ff,
+                            0xff53d4ff, 0x9baa8dff, 0x846d59ff, 0x15120eff,
+                            0x411552ff, 0x640000ff, 0x390715ff, 0x5a422dff];
     //commandline args
     let args: Vec<String> = env::args().collect();
     //println!("{:?}", args);
@@ -320,7 +336,8 @@ fn main () {
         // write png with frame name and direction angle
         let outpath = foldername.to_owned() + "/" + frame_name_s + "_" + &dir_angle.to_string() + ".png";
         println!("direction {:?}", outpath);
-        write_png(&mut pixels, outpath);
+        let path = Path::new(&outpath);
+        write_png(&mut pixels, path);
     }
 }
 
@@ -351,14 +368,13 @@ fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex],
     }
 }
 
-fn write_png (pixels: &mut[u32], path: String) {
+fn write_png (pixels: &mut[u32], path: &Path) {
     //convert to byte array    
     let mut bytes = Vec::<u8>::new();
     for val in pixels{
         bytes.extend_from_slice(&val.to_be_bytes());
     }
 
-    //let path = Path::new(r"raster.png");
     let file = File::create(path).unwrap();
     let ref mut w = BufWriter::new(file);
 
