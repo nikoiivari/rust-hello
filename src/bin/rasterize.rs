@@ -362,8 +362,9 @@ fn pixel_sample_ply (x: u8, y: u8, psize: f32, verts: &[Vertex],
     }
 
     if z1st > -scale { //-1.0
-                
-        pixels[(256*256-1) - (256 * (y as usize)) + (x as usize)-1] = z1stcolor;
+        
+        let ym = 255 - y;
+        pixels[(256 * ym as usize) + (x as usize)] = z1stcolor;
         
     }
 }

@@ -213,8 +213,9 @@ fn pixel_sample_rt (x: u8, y: u8, spheres: &[Sphere],
     //z1st = 0.0;
     //if (x as u8) == 128 {println!("slice {:x}", z1stcolor); }
     if z1st > -scale {
-                
-        pixels[(256 * (y as usize)) + (x as usize)] = z1stcolor;
+        // y-axis is flipped
+        let ym = 255 - y;       
+        pixels[(256 * ym as usize) + (x as usize)] = z1stcolor;
         
     }
 }
