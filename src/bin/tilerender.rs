@@ -8,7 +8,7 @@ use std::ops;
 use std::vec::Vec;
 //use std::fmt; //println!
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 struct Vec3 {
     x: f32,
     y: f32,
@@ -34,6 +34,12 @@ impl Vec3 {
         let len: f32  = f32::sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
         len
     }
+    fn normalize(&mut self) {
+        let len: f32  = f32::sqrt(self.x * self.x + self.y * self.y + self.z * self.z);
+        self.x = self.x * (1.0 / len);
+        self.y = self.y * (1.0 / len);
+        self.z = self.z * (1.0 / len);
+    }
 }
 
 impl ops::Add<Vec3> for Vec3 {
@@ -58,6 +64,18 @@ impl ops::Sub<Vec3> for Vec3 {
             x: self.x - other.x,
             y: self.y - other.y,
             z: self.z - other.z,
+        }
+    }
+}
+
+impl ops::Mul<f32> for Vec3 { // multiply Vec3 by scalar
+    type Output = Vec3;
+
+    fn mul(self, other: f32) -> Vec3 {
+        Vec3 {
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
         }
     }
 }
@@ -92,7 +110,7 @@ impl Intersection {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 struct Sphere {
     xyz: Vec3,
     radius: f32,
@@ -171,12 +189,16 @@ fn main() {
     let usphere: Sphere = Sphere::new_with_xyz_radius_rgb(uxyz, 0.3, urgb);
     spheres.push(usphere);
 
+    // directional lightsource
+    let mut light: Vec3 = Vec3::new_with_xyz(0.707, 0.707, 0.2);
+    light.normalize();
+
     if codepath == Codepath::Raytrace {
         for y in 0..=255 {
             for x  in 0..=255 {
-                let x8: u8 = x as u8;
-                let y8: u8 = y as u8; 
-                pixel_sample_rt (x8, y8, &spheres, 1.0, 0.0, &mut pixels);
+                //let x8: u8 = x as u8;
+                //let y8: u8 = y as u8; 
+                pixel_sample_rt (x, y, &spheres, light, 1.0, 0.0, &mut pixels);
             }
         }
     }
@@ -185,14 +207,14 @@ fn main() {
 
 }
 
-fn pixel_sample_rt (x: u8, y: u8, spheres: &[Sphere],
+fn pixel_sample_rt (x: u8, y: u8, spheres: &[Sphere], light: Vec3, // color
     scale: f32, vertical: f32, pixels: &mut [u32]) {
     
     let xf: f32 = (((x as f32) / 128.0) - 1.0) * scale;
     let yf: f32 = (((y as f32) / 128.0) - (1.0 + vertical)) * scale;
 
     let mut z1st: f32 = -scale + 0.01; //-2.01
-    let mut z1stcolor: u32 = 0x0000ffff; //FIXME solid color NOT transparent!!!
+    let mut z1stcolor: u32 = 0x0000ffff;
 
     for s in spheres {
         let origin: Vec3 = Vec3::new_with_xyz(xf, yf, scale);
@@ -201,9 +223,25 @@ fn pixel_sample_rt (x: u8, y: u8, spheres: &[Sphere],
         if inters.happened == true {
             if z1st < inters.xyz.z {
                 z1st = inters.xyz.z;
+                
+                // intersection color before shadow
                 z1stcolor  = (((inters.rgb.x * 256.0) as u32) << 24) +
                              (((inters.rgb.y * 256.0) as u32) << 16) + 
-                             (((inters.rgb.z * 256.0) as u32) << 8) + 0xff;
+                             (((inters.rgb.z * 256.0) as u32) << 8) + 0xff;  
+                // find shadows
+                for ss in spheres {
+                    if ss != s {
+                        //
+                        for i in 1..=3 {
+                            let shdw_intr: Intersection = ss.ray_intersection(inters.xyz, light * (i as f32));
+                            if shdw_intr.happened == true {
+                                // shadow color
+                                z1stcolor  = 0x000000ff; 
+                            }
+                        }
+                    }
+                }
+                
             }
         }
         
@@ -213,7 +251,7 @@ fn pixel_sample_rt (x: u8, y: u8, spheres: &[Sphere],
     //z1st = 0.0;
     //if (x as u8) == 128 {println!("slice {:x}", z1stcolor); }
     if z1st > -scale {
-        // y-axis is flipped
+        // find shadows for plane
         let ym = 255 - y;       
         pixels[(256 * ym as usize) + (x as usize)] = z1stcolor;
         
