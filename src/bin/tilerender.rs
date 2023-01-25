@@ -108,6 +108,31 @@ impl Intersection {
             happened: false,
         }
     }
+    fn shade(&mut self, light: Vec3, diffuse: u32, ambient: u32) {
+        //self.normal.normalize();
+        //dot prod.
+        let mut d: f32 = self.normal.x * light.x + self.normal.y * light.y + self.normal.z * light.z; 
+        
+        if d > 1.0 {d=1.0};
+        
+        let difr = (diffuse >> 24) as f32;
+        let difg = (diffuse >> 16 & 0x000000ff) as f32;
+        let difb = (diffuse >> 8  & 0x000000ff) as f32;
+        let ambr = (ambient >> 24) as f32;
+        let ambg = (ambient >> 16 & 0x000000ff) as f32;
+        let ambb = (ambient >> 8  & 0x000000ff) as f32;
+        let mut rd = (self.rgb.x * 255. + difr) * d + ambr; if rd > 255.0 {rd = 255.0};
+        let mut gr = (self.rgb.y * 255. + difg) * d + ambg; if gr > 255.0 {gr = 255.0};
+        let mut bl = (self.rgb.z * 255. + difb) * d + ambb; if bl > 255.0 {bl = 255.0};
+        /*
+        self.r = rd as u8;
+        self.g = gr as u8;
+        self.b = bl as u8;
+        */
+        self.rgb.x = rd / 255.;
+        self.rgb.y = gr / 255.;
+        self.rgb.z = bl / 255.;        
+    }
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -153,13 +178,20 @@ impl Sphere {
             y: origin.y + t*d.y,
             z: origin.z + t*d.z,
         };
-        // FIXME!!!! compute normal!!!
-        let int_n: Vec3 = Vec3::new_origo();
+        // find normal
+        let int_n: Vec3 = Vec3 {
+            x: (int_p.x - self.xyz.x)/self.radius,
+            y: (int_p.y - self.xyz.y)/self.radius,
+            z: (int_p.z - self.xyz.z)/self.radius,
+        };
+        //int_n.normalize();
         let int_rgb: Vec3 = self.rgb;
         let inters: Intersection = Intersection::new_with_xyz_normal_rgb(int_p, int_n, int_rgb);
         
         inters
     }
+
+    
 }
 
 fn dot3 (a: &Vec3, b: &Vec3) -> f32 {
@@ -180,25 +212,26 @@ fn main() {
     
     // TODO: create a vector of Spheres and loop through them for every pixel.
     let mut spheres: Vec<Sphere> = Vec::new();
-    let oxyz: Vec3 = Vec3::new_origo();
-    let orgb: Vec3 = Vec3::new_with_xyz(0.6, 0.2, 0.2);
-    let osphere: Sphere = Sphere::new_with_xyz_radius_rgb(oxyz, 0.2, orgb);
-    spheres.push(osphere);
-    let uxyz: Vec3 = Vec3::new_with_xyz(0.0, 0.4, 0.0);
-    let urgb: Vec3 = Vec3::new_with_xyz(0.2, 0.6, 0.2);
-    let usphere: Sphere = Sphere::new_with_xyz_radius_rgb(uxyz, 0.3, urgb);
-    spheres.push(usphere);
+    //let oxyz: Vec3 = Vec3::new_origo();
+    let rxyz: Vec3 = Vec3::new_with_xyz(0.0, -0.1, 0.2);
+    let rrgb: Vec3 = Vec3::new_with_xyz(0.6, 0.2, 0.2);
+    let rsphere: Sphere = Sphere::new_with_xyz_radius_rgb(rxyz, 0.2, rrgb);
+    spheres.push(rsphere);
+    let gxyz: Vec3 = Vec3::new_with_xyz(0.0, 0.32, 0.0);
+    let grgb: Vec3 = Vec3::new_with_xyz(0.2, 0.6, 0.2);
+    let gsphere: Sphere = Sphere::new_with_xyz_radius_rgb(gxyz, 0.3, grgb);
+    spheres.push(gsphere);
 
     // directional lightsource
-    let mut light: Vec3 = Vec3::new_with_xyz(0.707, 0.707, 0.2);
-    light.normalize();
+    let light: Vec3 = Vec3::new_with_xyz(1.0, -1.0, 0.8);
+    //light = light * -1.0;
+    //light.normalize();
 
     if codepath == Codepath::Raytrace {
         for y in 0..=255 {
             for x  in 0..=255 {
-                //let x8: u8 = x as u8;
-                //let y8: u8 = y as u8; 
-                pixel_sample_rt (x, y, &spheres, light, 1.0, 0.0, &mut pixels);
+                 
+                pixel_sample_rt (x, y, &spheres, light, 0xeeeeeeff, 0x4444eeff, 1.0, 0., &mut pixels);
             }
         }
     }
@@ -207,7 +240,7 @@ fn main() {
 
 }
 
-fn pixel_sample_rt (x: u8, y: u8, spheres: &[Sphere], light: Vec3, // color
+fn pixel_sample_rt (x: u8, y: u8, spheres: &[Sphere], mut light: Vec3, diffuse: u32, ambient: u32,
     scale: f32, vertical: f32, pixels: &mut [u32]) {
     
     let xf: f32 = (((x as f32) / 128.0) - 1.0) * scale;
@@ -219,25 +252,31 @@ fn pixel_sample_rt (x: u8, y: u8, spheres: &[Sphere], light: Vec3, // color
     for s in spheres {
         let origin: Vec3 = Vec3::new_with_xyz(xf, yf, scale);
         let destination: Vec3 = Vec3::new_with_xyz(xf, yf, -scale);
-        let inters: Intersection = s.ray_intersection(origin, destination);
+        // FIXME: Does ray_intersection() flip x & y coordinates?
+        let mut inters: Intersection = s.ray_intersection(origin, destination);
         if inters.happened == true {
             if z1st < inters.xyz.z {
                 z1st = inters.xyz.z;
                 
-                // intersection color before shadow
-                z1stcolor  = (((inters.rgb.x * 256.0) as u32) << 24) +
-                             (((inters.rgb.y * 256.0) as u32) << 16) + 
-                             (((inters.rgb.z * 256.0) as u32) << 8) + 0xff;  
+                // shade intersection point
+                let mut shade_light: Vec3 = light;
+                shade_light.normalize();
+                inters.shade(shade_light, diffuse, ambient);
+                // (shaded) intersection color before shadow
+                z1stcolor  = (((inters.rgb.x * 255.0) as u32) << 24) +
+                             (((inters.rgb.y * 255.0) as u32) << 16) + 
+                             (((inters.rgb.z * 255.0) as u32) << 8) + 0xff;
+                  
                 // find shadows
                 for ss in spheres {
                     if ss != s {
-                        //
-                        for i in 1..=3 {
-                            let shdw_intr: Intersection = ss.ray_intersection(inters.xyz, light * (i as f32));
-                            if shdw_intr.happened == true {
-                                // shadow color
-                                z1stcolor  = 0x000000ff; 
-                            }
+                        // FIXME: light  position gets inverted...?
+                        light.x = light.x * -1.;
+                        light.y = light.y * -1.;
+                        let shdw_intr: Intersection = ss.ray_intersection(inters.xyz, light * -1.);
+                        if shdw_intr.happened == true {
+                            // shadow color
+                            z1stcolor  = 0x000000ff; 
                         }
                     }
                 }
