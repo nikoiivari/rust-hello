@@ -80,31 +80,80 @@ impl ops::Mul<f32> for Vec3 { // multiply Vec3 by scalar
     }
 }
 
+#[derive(Copy, Clone, PartialEq)]
+struct Color {
+    y: f32,
+    co: f32,
+    cg: f32,
+    r: f32,
+    g: f32,
+    b: f32,
+}
+
+impl Color {
+    fn new_from_rgb(r: f32, g: f32, b: f32) -> Self {
+        // RGB to YCoCg-R
+        let tmp_co = r - b;
+        let tmp = b + tmp_co/2.;
+        let tmp_cg = g - tmp;
+        
+        Color {
+            y: tmp + tmp_cg/2.,
+            co: tmp_co,
+            cg: tmp_cg,
+            r: r,
+            g: g,
+            b: b,
+        }
+    }
+    fn new_from_ycocgr(y: f32, co: f32, cg: f32) -> Self {
+        // clamp...
+        // YCoCg-R ro RGB
+        let tmp = y - cg/2.;
+        let tmp_g = cg + tmp;
+        let tmp_b = tmp - co/2.;
+        let tmp_r = tmp_b + co;
+
+        Color {
+            y: y,
+            co: co,
+            cg: cg,
+            r: tmp_r,
+            g: tmp_g,
+            b: tmp_b,
+        }
+    }
+    fn new_from_hsv(h: f32, s: f32, v: f32) -> Self {
+        let c = v * s;
+        
+    }
+}
+
 #[derive(Copy, Clone)]
 struct Intersection {
     xyz: Vec3,
     normal: Vec3,
-    rgb: Vec3,
+    color: Color,
     happened: bool,
 }
 
 impl Intersection {
-    fn new_with_xyz_normal_rgb(xyz: Vec3, normal: Vec3, rgb: Vec3) -> Self {
+    fn new_with_xyz_normal_color(xyz: Vec3, normal: Vec3, color: Color) -> Self {
         Intersection {
             xyz: xyz,
             normal: normal,
-            rgb: rgb,
+            color: color,
             happened: true,
         }
     }
     fn new_did_not_happen() -> Self {
         let meh1: Vec3 = Vec3::new_origo();
         let meh2: Vec3 = Vec3::new_origo();
-        let meh3: Vec3 = Vec3::new_origo();
+        
         Intersection {
             xyz: meh1,
             normal: meh2,
-            rgb: meh3,
+            color: Color::new_from_rgb(0., 0., 0.),
             happened: false,
         }
     }
@@ -118,20 +167,24 @@ impl Intersection {
         let difr = (diffuse >> 24) as f32;
         let difg = (diffuse >> 16 & 0x000000ff) as f32;
         let difb = (diffuse >> 8  & 0x000000ff) as f32;
+        let _difc = Color::new_from_rgb(difr / 255., difg / 255., difb / 255.);
         let ambr = (ambient >> 24) as f32;
         let ambg = (ambient >> 16 & 0x000000ff) as f32;
         let ambb = (ambient >> 8  & 0x000000ff) as f32;
-        let mut rd = (self.rgb.x * 255. + difr) * d + ambr; if rd > 255.0 {rd = 255.0};
-        let mut gr = (self.rgb.y * 255. + difg) * d + ambg; if gr > 255.0 {gr = 255.0};
-        let mut bl = (self.rgb.z * 255. + difb) * d + ambb; if bl > 255.0 {bl = 255.0};
-        /*
-        self.r = rd as u8;
-        self.g = gr as u8;
-        self.b = bl as u8;
-        */
-        self.rgb.x = rd / 255.;
-        self.rgb.y = gr / 255.;
-        self.rgb.z = bl / 255.;        
+        let ambc = Color::new_from_rgb(ambr / 255., ambg / 255., ambb / 255.);
+        
+        let col_d = Color::new_from_rgb(self.color.r * d, self.color.g * d, self.color.b * d);
+        let col_a = Color::new_from_ycocgr((col_d.y + ambc.y)/2., col_d.co, col_d.cg);
+
+        //let mut rd = (self.color.r * 255. + difr)/2. * d + ambr; if rd > 255.0 {rd = 255.0};
+        //let mut gr = (self.color.g * 255. + difg)/2. * d + ambg; if gr > 255.0 {gr = 255.0};
+        //let mut bl = (self.color.b * 255. + difb)/2. * d + ambb; if bl > 255.0 {bl = 255.0};
+
+        let mut rd = col_a.r; if rd > 1.0 {rd = 1.0};
+        let mut gr = col_a.g; if gr > 1.0 {gr = 1.0};
+        let mut bl = col_a.b; if bl > 1.0 {bl = 1.0};
+                
+        self.color = Color::new_from_rgb( rd, gr, bl );   
     }
 }
 
@@ -139,15 +192,15 @@ impl Intersection {
 struct Sphere {
     xyz: Vec3,
     radius: f32,
-    rgb: Vec3,
+    color: Color,
 }
 
 impl Sphere {
-    fn new_with_xyz_radius_rgb(xyz: Vec3, radius: f32, rgb: Vec3) -> Self {
+    fn new_with_xyz_radius_color(xyz: Vec3, radius: f32, color: Color) -> Self {
         Sphere {
             xyz: xyz,
             radius: radius,
-            rgb: rgb,
+            color: color,
         }
     }
 
@@ -185,8 +238,8 @@ impl Sphere {
             z: (int_p.z - self.xyz.z)/self.radius,
         };
         //int_n.normalize();
-        let int_rgb: Vec3 = self.rgb;
-        let inters: Intersection = Intersection::new_with_xyz_normal_rgb(int_p, int_n, int_rgb);
+        let int_color: Color = self.color;
+        let inters: Intersection = Intersection::new_with_xyz_normal_color(int_p, int_n, int_color);
         
         inters
     }
@@ -196,6 +249,22 @@ impl Sphere {
 
 fn dot3 (a: &Vec3, b: &Vec3) -> f32 {
     return a.x*b.x + a.y*b.y + a.z*b.z
+}
+
+fn max3 (r: f32, g: f32, b: f32) -> f32 {
+    let rrg: bool = r > g;
+    let ggb: bool = g > b;
+    if rrg & ggb {return r;}
+    else if ggb {return g;}
+    else {return b;}
+}
+
+fn min3 (r: f32, g: f32, b: f32) -> f32 {
+    let grr: bool = r > g;
+    let bgg: bool = g > b;
+    if grr & bgg {return b;}
+    else if grr {return g;}
+    else {return r;}
 }
 
 #[derive(PartialEq)]
@@ -214,12 +283,10 @@ fn main() {
     let mut spheres: Vec<Sphere> = Vec::new();
     //let oxyz: Vec3 = Vec3::new_origo();
     let rxyz: Vec3 = Vec3::new_with_xyz(0.0, -0.1, 0.2);
-    let rrgb: Vec3 = Vec3::new_with_xyz(0.6, 0.2, 0.2);
-    let rsphere: Sphere = Sphere::new_with_xyz_radius_rgb(rxyz, 0.2, rrgb);
+    let rsphere: Sphere = Sphere::new_with_xyz_radius_color(rxyz, 0.2, Color::new_from_rgb(0.6, 0.2, 0.2));
     spheres.push(rsphere);
     let gxyz: Vec3 = Vec3::new_with_xyz(0.0, 0.32, 0.0);
-    let grgb: Vec3 = Vec3::new_with_xyz(0.2, 0.6, 0.2);
-    let gsphere: Sphere = Sphere::new_with_xyz_radius_rgb(gxyz, 0.3, grgb);
+    let gsphere: Sphere = Sphere::new_with_xyz_radius_color(gxyz, 0.3, Color::new_from_rgb(0.2, 0.6, 0.2));
     spheres.push(gsphere);
 
     // directional lightsource
@@ -263,9 +330,9 @@ fn pixel_sample_rt (x: u8, y: u8, spheres: &[Sphere], mut light: Vec3, diffuse: 
                 shade_light.normalize();
                 inters.shade(shade_light, diffuse, ambient);
                 // (shaded) intersection color before shadow
-                z1stcolor  = (((inters.rgb.x * 255.0) as u32) << 24) +
-                             (((inters.rgb.y * 255.0) as u32) << 16) + 
-                             (((inters.rgb.z * 255.0) as u32) << 8) + 0xff;
+                z1stcolor  = (((inters.color.r * 255.0) as u32) << 24) +
+                             (((inters.color.g * 255.0) as u32) << 16) + 
+                             (((inters.color.b * 255.0) as u32) << 8) + 0xff;
                   
                 // find shadows
                 for ss in spheres {
