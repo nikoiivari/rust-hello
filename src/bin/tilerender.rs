@@ -123,10 +123,10 @@ impl Color {
             b: tmp_b,
         }
     }
-    fn new_from_hsv(h: f32, s: f32, v: f32) -> Self {
-        let c = v * s;
+    //fn new_from_hsv(h: f32, s: f32, v: f32) -> Self {
+    //    let c = v * s;
         
-    }
+    //}
 }
 
 #[derive(Copy, Clone)]
