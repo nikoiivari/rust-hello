@@ -5,7 +5,9 @@ use sdl2::event::Event;
 use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
-use sdl2::video::GLProfile;
+//use sdl2::video::GLProfile;
+
+use gl::types::GLuint;
 
 use std::time::Duration;
 
@@ -17,7 +19,7 @@ fn main() {
     winbuild.resizable();
     let window = winbuild.opengl().build().unwrap();
 
-    let context = window.gl_create_context().unwrap();
+    let _context = window.gl_create_context().unwrap();
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
     let mut event_pump = sdl_context.event_pump().unwrap();
@@ -55,10 +57,29 @@ fn main() {
         unsafe {
             gl::ClearColor(0.0, 0.5, 0.5, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
+
+            let vertices: Vec<f32> = vec![0.0, 0.0, 0.0,
+                                          0.0, 1.0, 0.0,
+                                          1.0, 1.0, 0.0];
+                                          
+            let mut vertexarrayid: GLuint = 0;
+            gl::GenVertexArrays(1, &mut vertexarrayid);
+            gl::BindVertexArray(vertexarrayid);
+            println!("VertexArrayId: {vertexarrayid}");
+
+            let mut vertexbuffer: GLuint = 0;
+            gl::GenBuffers(1, &mut vertexbuffer);
+            //gl::BindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+            println!("VertexBufferId: {vertexbuffer}");
+
+
+            //release stuff
+            gl::DeleteVertexArrays(1, &mut vertexarrayid);
+            gl::DeleteBuffers(1, &mut vertexbuffer);
         }
 
         window.gl_swap_window();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 6));
     }
 
 
