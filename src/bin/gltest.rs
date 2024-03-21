@@ -10,19 +10,26 @@ use sdl2::mouse::MouseButton;
 use gl::types::GLuint;
 
 use std::time::Duration;
+use std::ffi::{CString, CStr};
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
+    let gl_attr = video_subsystem.gl_attr();
+    gl_attr.set_context_profile(sdl2::video::GLProfile::Core);
+    gl_attr.set_context_version(3, 3); //OpenGL 3.3.0
+
     let mut winbuild = sdl2::video::WindowBuilder::new(&video_subsystem,"Test", 800, 600);
     winbuild.resizable();
     let window = winbuild.opengl().build().unwrap();
-
+    
     let _context = window.gl_create_context().unwrap();
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
     let mut event_pump = sdl_context.event_pump().unwrap();
+    let vs = build_vertex_shader();
+    //let fs = build_fragment_shader();
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -65,13 +72,32 @@ fn main() {
             let mut vertexarrayid: GLuint = 0;
             gl::GenVertexArrays(1, &mut vertexarrayid);
             gl::BindVertexArray(vertexarrayid);
-            println!("VertexArrayId: {vertexarrayid}");
+            //println!("VertexArrayId: {vertexarrayid}");
 
             let mut vertexbuffer: GLuint = 0;
             gl::GenBuffers(1, &mut vertexbuffer);
-            //gl::BindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-            println!("VertexBufferId: {vertexbuffer}");
+            gl::BindBuffer(gl::ARRAY_BUFFER, vertexbuffer);
+            //println!("VertexBufferId: {vertexbuffer}");
+            
+            //gl::EnableVertexAttribArray(0); //index
+            //gl::VertexAttribPointer(
+            //                        0, //index
+            //                        3,
+            //                        gl::FLOAT,
+            //                        gl::FALSE,
+            //                        (3 * std::mem::size_of::<f32>()) as gl::types::GLint,
+            //                        ()
+            //                        );
+            
+            gl::BufferData(
+                gl::ARRAY_BUFFER,
+                (vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, //size in bytes
+                vertices.as_ptr() as *const gl::types::GLvoid, //pointer
+                gl::STATIC_DRAW,
+            );
 
+            gl::DrawArrays(gl::TRIANGLES, 0, 3);
+            //gl::DisableVertexAttribArray(0);
 
             //release stuff
             gl::DeleteVertexArrays(1, &mut vertexarrayid);
@@ -79,8 +105,24 @@ fn main() {
         }
 
         window.gl_swap_window();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 6));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); //60
     }
 
+}
 
+fn build_vertex_shader() -> GLuint {
+    let vshader:GLuint = unsafe { gl::CreateShader(gl::VERTEX_SHADER) };
+
+    let source: &CStr  = CStr::from_bytes_with_nul(b"#version 330
+    layout(location = 0) in vec3 vertexPos
+    void main (){
+        gl_Position.xyz = vertexPos;
+        gl_Position.w = 1.0;
+    }\0").unwrap();
+
+    unsafe {
+        gl::ShaderSource(vshader, 1, &source.as_ptr(), std::ptr::null());
+        gl::CompileShader(vshader);
+    }
+    return vshader;
 }
