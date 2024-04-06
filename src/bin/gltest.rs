@@ -126,3 +126,19 @@ fn build_vertex_shader() -> GLuint {
     }
     return vshader;
 }
+
+fn build_fragment_shader() -> GLuint {
+    let fshader:GLuint = unsafe { gl::CreateShader(gl::FRAGMENT_SHADER) };
+
+    let source: &CStr  = CStr::from_bytes_with_nul(b"#version 330
+    out vec4 fragColor;
+    void main (){
+        fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }\0").unwrap();
+
+    unsafe {
+        gl::ShaderSource(fshader, 1, &source.as_ptr(), std::ptr::null());
+        gl::CompileShader(fshader);
+    }
+    return fshader;
+}
