@@ -68,7 +68,11 @@ fn main() {
 
             let vertices: Vec<f32> = vec![0.0, 0.0, 0.0,
                                           0.0, 1.0, 0.0,
-                                          1.0, 1.0, 0.0];
+                                          1.0, 1.0, 0.0,
+                                          
+                                          0.0, 0.0, 0.0,
+                                          1.0, 1.0, 0.0,
+                                          1.0, 0.0, 0.0]; //6
                                           
             let mut vertexarrayid: GLuint = 0;
             gl::GenVertexArrays(1, &mut vertexarrayid);
@@ -98,7 +102,7 @@ fn main() {
             );
 
             gl::UseProgram(prog);
-            gl::DrawArrays(gl::TRIANGLES, 0, 3);
+            gl::DrawArrays(gl::TRIANGLES, 0, 6);
             gl::DisableVertexAttribArray(0);
 
             //release stuff
