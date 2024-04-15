@@ -66,13 +66,13 @@ fn main() {
             gl::ClearColor(0.0, 0.5, 0.5, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
-            let vertices: Vec<f32> = vec![0.0, 0.0, 0.0,
-                                          0.0, 1.0, 0.0,
-                                          1.0, 1.0, 0.0,
+            let vertices: Vec<f32> = vec![0.0, 0.0, -1.0,
+                                          0.0, 1.0, -1.0,
+                                          1.0, 1.0, -1.0,
                                           
-                                          0.0, 0.0, 0.0,
-                                          1.0, 1.0, 0.0,
-                                          1.0, 0.0, 0.0]; //6
+                                          0.0, 0.0, -2.0,
+                                          1.0, 1.0, -2.0,
+                                          1.0, 0.0, -2.0]; //6
                                           
             let mut vertexarrayid: GLuint = 0;
             gl::GenVertexArrays(1, &mut vertexarrayid);
@@ -120,9 +120,16 @@ fn build_vertex_shader() -> GLuint {
     let vshader:GLuint = unsafe { gl::CreateShader(gl::VERTEX_SHADER) };
 
     let source: &CStr  = CStr::from_bytes_with_nul(b"#version 330 core
+    #define PI 3.1415926538
     layout(location = 0) in vec3 vertexPos;
     void main (){
-        gl_Position.xyz = vertexPos;
+        float scale = 0.25;
+        float aspect = 800/600; //FIXME: make aspect ratio actually work.
+        float correct_y = vertexPos.y * aspect; //MEH:
+
+        gl_Position.x = vertexPos.x * scale;
+        gl_Position.y = vertexPos.y * scale; //MEH:
+        gl_Position.z = vertexPos.z * scale;
         gl_Position.w = 1.0;
     }\0").unwrap();
 
