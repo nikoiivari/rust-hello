@@ -42,8 +42,8 @@ fn main() {
                 Event::Window {timestamp: _, window_id: _, win_event: wev} => {
                     match wev {
                         WindowEvent::SizeChanged(winw, winh) => {
-                             println!("Size changed {}, {}", winw, winh);
-                            
+                            println!("Size changed {}, {}", winw, winh);
+                            unsafe { gl::Viewport(0, 0, winw, winh); }
                         }
                         _ => {}    
                     }
@@ -70,9 +70,9 @@ fn main() {
                                           0.0, 1.0, -1.0,
                                           1.0, 1.0, -1.0,
                                           
-                                          0.0, 0.0, -2.0,
-                                          1.0, 1.0, -2.0,
-                                          1.0, 0.0, -2.0]; //6
+                                          0.0, 0.0, 1.0,
+                                          1.0, 1.0, 1.0,
+                                          1.0, 0.0, 1.0]; //6
                                           
             let mut vertexarrayid: GLuint = 0;
             gl::GenVertexArrays(1, &mut vertexarrayid);
@@ -125,11 +125,12 @@ fn build_vertex_shader() -> GLuint {
     void main (){
         float scale = 0.25;
         float aspect = 800/600; //FIXME: make aspect ratio actually work.
-        float correct_y = vertexPos.y * aspect; //MEH:
 
-        gl_Position.x = vertexPos.x * scale;
-        gl_Position.y = vertexPos.y * scale; //MEH:
-        gl_Position.z = vertexPos.z * scale;
+        //vec4 vertex;
+        //vertex.xyz = vertexPos;
+        //vertex.w = 1.0;
+        
+        gl_Position.xyz = vertexPos;
         gl_Position.w = 1.0;
     }\0").unwrap();
 
