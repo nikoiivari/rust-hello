@@ -70,9 +70,9 @@ fn main() {
                                           0.0, 1.0, -1.0,
                                           1.0, 1.0, -1.0,
                                           
-                                          0.0, 0.0, 1.0,
-                                          1.0, 1.0, 1.0,
-                                          1.0, 0.0, 1.0]; //6
+                                          0.0, 0.0, -1.0,
+                                          1.0, 1.0, -1.0,
+                                          1.0, 0.0, -1.0]; //6
                                           
             let mut vertexarrayid: GLuint = 0;
             gl::GenVertexArrays(1, &mut vertexarrayid);
@@ -122,16 +122,38 @@ fn build_vertex_shader() -> GLuint {
     let source: &CStr  = CStr::from_bytes_with_nul(b"#version 330 core
     #define PI 3.1415926538
     layout(location = 0) in vec3 vertexPos;
-    void main (){
-        float scale = 0.25;
-        float aspect = 800/600; //FIXME: make aspect ratio actually work.
 
-        //vec4 vertex;
-        //vertex.xyz = vertexPos;
-        //vertex.w = 1.0;
+    mat4 pmFrustum(float left,     float right,
+                   float bottom,   float top,
+                   float near,     float far)
+    {
+        mat4 pm = mat4(0.0);
+        pm[0][0]=(2*near)/(right-left);
+        pm[1][1]=(2*near)/(top-bottom);
         
-        gl_Position.xyz = vertexPos;
-        gl_Position.w = 1.0;
+        pm[0][2]=(right+left)/(right-left);
+        pm[1][2]=(top+bottom)/(top-bottom);
+        pm[2][2]=-(far+near)/(far-near);
+        pm[3][2]=(-1.0);
+        
+        pm[2][3]=-(2*far*near)/(far-near);
+        pm[3][3]=1.0;
+        return pm;
+    }
+
+    void main (){
+        vec4 vertex = vec4(vertexPos, 1.0);
+
+        float fovVertical = 70.0;
+        float aspectRatio = 800.0/600.0;
+        float zNear = 0.2;
+        float zFar = 100.0;
+
+        float halfW = tan(0.5 * (fovVertical/180 * PI));
+        float halfH = halfW / aspectRatio;
+        mat4 projection = pmFrustum(-halfW, halfW, -halfH, halfH, zNear, zFar);        
+        
+        gl_Position = projection * vertex;
     }\0").unwrap();
 
     unsafe {
