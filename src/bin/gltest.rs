@@ -123,6 +123,19 @@ fn build_vertex_shader() -> GLuint {
     #define PI 3.1415926538
     layout(location = 0) in vec3 vertexPos;
 
+    mat4 tmZ(float translationZ)
+    {
+        mat4 tm = mat4(0.0);
+        tm[0][0]=1.0;
+        tm[1][1]=1.0;
+
+        tm[2][2]= 1.0;
+
+        tm[2][3]=translationZ;
+        tm[3][3]=1.0;
+        return tm;
+    }    
+    
     mat4 pmFrustum(float left,     float right,
                    float bottom,   float top,
                    float near,     float far)
@@ -151,9 +164,11 @@ fn build_vertex_shader() -> GLuint {
 
         float halfW = tan(0.5 * (fovVertical/180 * PI));
         float halfH = halfW / aspectRatio;
-        mat4 projection = pmFrustum(-halfW, halfW, -halfH, halfH, zNear, zFar);        
+        mat4 projection = pmFrustum(-halfW, halfW, -halfH, halfH, zNear, zFar);
+
+        mat4 translationZ = tmZ(-2.0);
         
-        gl_Position = projection * vertex;
+        gl_Position = projection * translationZ * vertex;
     }\0").unwrap();
 
     unsafe {
