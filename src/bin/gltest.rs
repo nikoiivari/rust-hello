@@ -28,6 +28,14 @@ fn main() {
     gl::load_with(|name| video_subsystem.gl_get_proc_address(name) as *const _);
 
     let mut event_pump = sdl_context.event_pump().unwrap();
+
+    // Mouse rotation
+    let rotatex:f32 = 0.0;
+    let mut rotatey:f32 = 0.0;
+    let mut oldmousex: i32 = 0;
+    let mut _oldmousey: i32 = 0;
+    let mut rotate_ongoing:bool = false;
+
     let vs = build_vertex_shader();
     let fs = build_fragment_shader();
     let prog = link_shaders(vs, fs);
@@ -52,10 +60,25 @@ fn main() {
                 Event::KeyUp { keycode: Some(Keycode::Space), .. } => {
                     println!("Space");
                 },
-                //Event::MouseButtonDown {} => 
+                Event::MouseButtonDown {mouse_btn:mouseb, x:mousex, y:_mousey, .. } => {
+                    if MouseButton::Middle == mouseb {                        
+                        rotate_ongoing = true;
+                    }
+                }
                 Event::MouseButtonUp {mouse_btn:mouseb, x:mousex, y:mousey, .. } => {
                     if MouseButton::Left == mouseb {
                         println!("Mouse x:{}, y:{}", mousex, mousey);
+                    }
+                    if MouseButton::Middle == mouseb {
+                        rotate_ongoing = false;
+                    }
+                }
+                Event::MouseMotion {xrel:mousex, yrel:mousey, .. } => {
+                    if rotate_ongoing {
+                        rotatey = rotatey + mousex as f32;
+                        if rotatey > 360.0 { rotatey = rotatey - 360.0; }
+                        if rotatey < 0.0 { rotatey = 360.0 - rotatey; }
+                        //TODO: rotatex/mousey
                     }
                 }
                 _ => {}
@@ -102,6 +125,7 @@ fn main() {
             );
 
             gl::UseProgram(prog);
+            gl::Uniform2f(0, rotatex, rotatey);
             gl::DrawArrays(gl::TRIANGLES, 0, 6);
             gl::DisableVertexAttribArray(0);
 
@@ -122,6 +146,8 @@ fn build_vertex_shader() -> GLuint {
     let source: &CStr  = CStr::from_bytes_with_nul(b"#version 330 core
     #define PI 3.1415926538
     layout(location = 0) in vec3 vertexPos;
+
+    uniform vec2 rotate;
 
     mat4 tmZ(float translationZ)
     {
@@ -192,18 +218,18 @@ fn build_vertex_shader() -> GLuint {
 
         float fovVertical = 70.0;
         float aspectRatio = 800.0/600.0;
-        float zNear = 0.2;
+        float zNear = 1.0;
         float zFar = 100.0;
 
         float halfW = tan(0.5 * (fovVertical/180 * PI));
         float halfH = halfW / aspectRatio;
         mat4 projection = pmFrustum(-halfW, halfW, -halfH, halfH, zNear, zFar);
 
-        mat4 translationZ = tmZ(-2.0);
-        mat4 rotationX = rmX(35.0);
-        mat4 rotationY = rmY(5.0);
+        mat4 translationZ = tmZ(-10.0);
+        mat4 rotationX = rmX(rotate.x);
+        mat4 rotationY = rmY(rotate.y);
         
-        gl_Position = projection * (rotationX * rotationY) * translationZ * vertex;
+        gl_Position = projection * ((rotationY * rotationX) * translationZ) * vertex;
     }\0").unwrap();
 
     unsafe {
