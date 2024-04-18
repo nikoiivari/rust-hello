@@ -134,7 +134,40 @@ fn build_vertex_shader() -> GLuint {
         tm[2][3]=translationZ;
         tm[3][3]=1.0;
         return tm;
-    }    
+    }
+
+    mat4 rmX(float rotationX)
+    {
+        float rx = rotationX/180.0 * PI;
+        mat4 rm = mat4(0.0);
+        rm[0][0]=1.0; rm[1][0]=0.0;     rm[2][0]=0.0;       rm[3][0]=0.0;
+        rm[0][1]=0.0; rm[1][1]=cos(rx); rm[2][1]=-sin(rx);  rm[3][1]=0.0;
+        rm[0][2]=0.0; rm[1][2]=sin(rx); rm[2][2]=cos(rx);   rm[3][2]=0.0;
+        rm[0][3]=0.0; rm[1][3]=0.0;     rm[2][3]=0.0;       rm[3][3]=1.0;
+        return rm;
+    }
+
+    mat4 rmY(float rotationY)
+    {
+        float ry = rotationY/180.0 * PI;
+        mat4 rm = mat4(0.0);
+        rm[0][0]=cos(ry);   rm[1][0]=0.0;   rm[2][0]=sin(ry);   rm[3][0]=0.0;
+        rm[0][1]=0.0;       rm[1][1]=1.0;   rm[2][1]=0.0;       rm[3][1]=0.0;
+        rm[0][2]=-sin(ry);  rm[1][2]=0.0;   rm[2][2]=cos(ry);   rm[3][2]=0.0;
+        rm[0][3]=0.0;       rm[1][3]=0.0;   rm[2][3]=0.0;       rm[3][3]=1.0;
+        return rm;
+    }
+
+    mat4 rmZ(float rotationZ)
+    {
+        float rz = rotationZ/180.0 * PI;
+        mat4 rm = mat4(0.0);
+        rm[0][0]=cos(rz);   rm[1][0]=-sin(rz);  rm[2][0]=0.0;   rm[3][0]=0.0;
+        rm[0][1]=sin(rz);   rm[1][1]=cos(rz);   rm[2][1]=0.0;   rm[3][1]=0.0;
+        rm[0][2]=0.0;       rm[1][2]=0.0;       rm[2][2]=1.0;   rm[3][2]=0.0;
+        rm[0][3]=0.0;       rm[1][3]=0.0;       rm[2][3]=0.0;   rm[3][3]=1.0;
+        return rm;
+    }
     
     mat4 pmFrustum(float left,     float right,
                    float bottom,   float top,
@@ -167,8 +200,10 @@ fn build_vertex_shader() -> GLuint {
         mat4 projection = pmFrustum(-halfW, halfW, -halfH, halfH, zNear, zFar);
 
         mat4 translationZ = tmZ(-2.0);
+        mat4 rotationX = rmX(35.0);
+        mat4 rotationY = rmY(5.0);
         
-        gl_Position = projection * translationZ * vertex;
+        gl_Position = projection * (rotationX * rotationY) * translationZ * vertex;
     }\0").unwrap();
 
     unsafe {
