@@ -154,7 +154,6 @@ fn main() {
 
             gl::UseProgram(prog0);
             gl::Uniform2f(0, rotatex, rotatey);
-            gl::Uniform4f(1, 0.4, 0.4, 0.4, 1.0);
             gl::DrawArrays(gl::TRIANGLES, 0, 12);
             gl::DisableVertexAttribArray(0);
 
@@ -192,7 +191,6 @@ fn main() {
 
             gl::UseProgram(prog1);
             gl::Uniform2f(0, rotatex, rotatey);
-            gl::Uniform4f(1, 0.9, 0.9, 0.9, 1.0);
             gl::DrawArrays(gl::TRIANGLES, 0, 12);
             gl::DisableVertexAttribArray(0);
             
