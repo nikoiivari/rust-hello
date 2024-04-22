@@ -30,15 +30,15 @@ fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
 
     // Mouse rotation
-    let rotatex:f32 = 0.0;
+    let mut rotatex:f32 = 0.0;
     let mut rotatey:f32 = 0.0;
-    let mut oldmousex: i32 = 0;
-    let mut _oldmousey: i32 = 0;
     let mut rotate_ongoing:bool = false;
 
     let vs = build_vertex_shader();
-    let fs = build_fragment_shader();
-    let prog = link_shaders(vs, fs);
+    let fs0 = build_fragment_shader(0);
+    let fs1 = build_fragment_shader(1);
+    let prog0 = link_shaders(vs, fs0);
+    let prog1 = link_shaders(vs, fs1);
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -60,7 +60,7 @@ fn main() {
                 Event::KeyUp { keycode: Some(Keycode::Space), .. } => {
                     println!("Space");
                 },
-                Event::MouseButtonDown {mouse_btn:mouseb, x:mousex, y:_mousey, .. } => {
+                Event::MouseButtonDown {mouse_btn:mouseb, x:_mousex, y:_mousey, .. } => {
                     if MouseButton::Middle == mouseb {                        
                         rotate_ongoing = true;
                     }
@@ -79,6 +79,9 @@ fn main() {
                         if rotatey > 360.0 { rotatey = rotatey - 360.0; }
                         if rotatey < 0.0 { rotatey = 360.0 - rotatey; }
                         //TODO: rotatex/mousey
+                        rotatex = rotatex + mousey as f32;
+                        if rotatex > 360.0 { rotatex = rotatex - 360.0; }
+                        if rotatex < 0.0 { rotatex = 360.0 - rotatex;}
                     }
                 }
                 _ => {}
@@ -89,14 +92,39 @@ fn main() {
             gl::ClearColor(0.0, 0.5, 0.5, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
-            let vertices: Vec<f32> = vec![0.0, 0.0, -1.0,
-                                          0.0, 1.0, -1.0,
-                                          1.0, 1.0, -1.0,
-                                          
+            let vertices: Vec<f32> = vec![0.0, 0.0, 0.0,
                                           0.0, 0.0, -1.0,
-                                          1.0, 1.0, -1.0,
-                                          1.0, 0.0, -1.0]; //6
+                                          1.0, 0.0, -1.0,
                                           
+                                          0.0, 0.0, 0.0,
+                                          1.0, 0.0, -1.0,
+                                          1.0, 0.0, 0.0,
+                                          
+                                          0.0, 0.0, 0.0,
+                                          0.0, 0.0, 1.0,
+                                          -1.0, 0.0, 1.0,
+                                          
+                                          0.0, 0.0, 0.0,
+                                          -1.0, 0.0, 1.0,
+                                          -1.0, 0.0, 0.0,]; //12
+                                        
+            let vertices2: Vec<f32> = vec![0.0, 0.0, 0.0,
+                                          -1.0, 0.0, 0.0,
+                                          -1.0, 0.0, -1.0,
+                                          
+                                          0.0, 0.0, 0.0,
+                                          -1.0, 0.0, -1.0,
+                                          0.0, 0.0, -1.0,
+                                          
+                                          0.0, 0.0, 0.0,
+                                          0.0, 0.0, 1.0,
+                                          1.0, 0.0, 1.0,
+                                          
+                                          0.0, 0.0, 0.0,
+                                          1.0, 0.0, 1.0,
+                                          1.0, 0.0, 0.0,]; //12
+
+            // vertices
             let mut vertexarrayid: GLuint = 0;
             gl::GenVertexArrays(1, &mut vertexarrayid);
             gl::BindVertexArray(vertexarrayid);
@@ -124,14 +152,53 @@ fn main() {
                 gl::STATIC_DRAW,
             );
 
-            gl::UseProgram(prog);
+            gl::UseProgram(prog0);
             gl::Uniform2f(0, rotatex, rotatey);
-            gl::DrawArrays(gl::TRIANGLES, 0, 6);
+            gl::Uniform4f(1, 0.4, 0.4, 0.4, 1.0);
+            gl::DrawArrays(gl::TRIANGLES, 0, 12);
             gl::DisableVertexAttribArray(0);
 
             //release stuff
             gl::DeleteVertexArrays(1, &mut vertexarrayid);
             gl::DeleteBuffers(1, &mut vertexbuffer);
+
+            //vertices2
+            let mut vertexarrayid2: GLuint = 0;
+            gl::GenVertexArrays(1, &mut vertexarrayid);
+            gl::BindVertexArray(vertexarrayid);
+            //println!("VertexArrayId: {vertexarrayid}");
+
+            let mut vertexbuffer2: GLuint = 0;
+            gl::GenBuffers(1, &mut vertexbuffer);
+            gl::BindBuffer(gl::ARRAY_BUFFER, vertexbuffer);
+            //println!("VertexBufferId: {vertexbuffer}");
+            
+            gl::EnableVertexAttribArray(0); //index
+            gl::VertexAttribPointer(
+                                    0, //index
+                                    3,
+                                    gl::FLOAT,
+                                    gl::FALSE,
+                                    0,
+                                    std::ptr::null()
+            );
+            
+            gl::BufferData(
+                gl::ARRAY_BUFFER,
+                (vertices2.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, //size in bytes
+                vertices2.as_ptr() as *const gl::types::GLvoid, //pointer
+                gl::STATIC_DRAW,
+            );
+
+            gl::UseProgram(prog1);
+            gl::Uniform2f(0, rotatex, rotatey);
+            gl::Uniform4f(1, 0.9, 0.9, 0.9, 1.0);
+            gl::DrawArrays(gl::TRIANGLES, 0, 12);
+            gl::DisableVertexAttribArray(0);
+            
+            //release more stuff
+            gl::DeleteVertexArrays(1, &mut vertexarrayid2);
+            gl::DeleteBuffers(1, &mut vertexbuffer2);
         }
 
         window.gl_swap_window();
@@ -159,6 +226,16 @@ fn build_vertex_shader() -> GLuint {
 
         tm[2][3]=translationZ;
         tm[3][3]=1.0;
+        return tm;
+    }
+
+    mat4 tmV(vec3 V)
+    {
+        mat4 tm = mat4(0.0);
+        tm[0][0]=1.0;   tm[1][0]=0.0;   tm[2][0]=0.0;   tm[3][0]=V.x;
+        tm[0][1]=0.0;   tm[1][1]=1.0;   tm[2][1]=0.0;   tm[3][1]=V.y;
+        tm[0][2]=0.0;   tm[1][2]=0.0;   tm[2][2]=1.0;   tm[3][2]=V.z;
+        tm[0][3]=0.0;   tm[1][3]=0.0;   tm[2][3]=0.0;   tm[3][3]=1.0;
         return tm;
     }
 
@@ -225,11 +302,12 @@ fn build_vertex_shader() -> GLuint {
         float halfH = halfW / aspectRatio;
         mat4 projection = pmFrustum(-halfW, halfW, -halfH, halfH, zNear, zFar);
 
-        mat4 translationZ = tmZ(-10.0);
         mat4 rotationX = rmX(rotate.x);
         mat4 rotationY = rmY(rotate.y);
+        vec3 translatev = vec3(0.0, -2.0, -10.0);
+        mat4 viewzoom = tmV(translatev);
         
-        gl_Position = projection * ((rotationY * rotationX) * translationZ) * vertex;
+        gl_Position = projection * (viewzoom * (rotationX * rotationY)) * vertex;
     }\0").unwrap();
 
     unsafe {
@@ -256,17 +334,26 @@ fn build_vertex_shader() -> GLuint {
     return vshader;
 }
 
-fn build_fragment_shader() -> GLuint {
+fn build_fragment_shader(what:u8) -> GLuint {
     let fshader:GLuint = unsafe { gl::CreateShader(gl::FRAGMENT_SHADER) };
 
-    let source: &CStr  = CStr::from_bytes_with_nul(b"#version 330 core
-    out vec4 fragColor;
-    void main (){
-        fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }\0").unwrap();
+    let source0: &CStr  = CStr::from_bytes_with_nul(b"#version 330 core
+            out vec4 fragColor;
+            void main (){
+            fragColor = vec4(0.2, 0.2, 0.2, 1.0);
+            }\0").unwrap();
+    let source1: &CStr  = CStr::from_bytes_with_nul(b"#version 330 core
+            out vec4 fragColor;
+            void main (){
+            fragColor = vec4(0.6, 0.6, 0.6, 1.0);
+            }\0").unwrap();
+    match what {
+        0=>unsafe { gl::ShaderSource(fshader, 1, &source0.as_ptr(), std::ptr::null()); }
+        1=>unsafe { gl::ShaderSource(fshader, 1, &source1.as_ptr(), std::ptr::null()); }
+        _=>unsafe { gl::ShaderSource(fshader, 1, &source0.as_ptr(), std::ptr::null()); }
+    }
 
     unsafe {
-        gl::ShaderSource(fshader, 1, &source.as_ptr(), std::ptr::null());
         gl::CompileShader(fshader);
         let mut success: GLint = 1;
         gl::GetShaderiv(fshader, gl::COMPILE_STATUS, &mut success);
