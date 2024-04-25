@@ -4,8 +4,7 @@ extern crate gl;
 use sdl2::event::Event;
 use sdl2::event::WindowEvent;
 use sdl2::keyboard::Keycode;
-use sdl2::mouse::MouseButton;
-//use sdl2::video::GLProfile;
+use sdl2::mouse::{MouseButton, Cursor, SystemCursor};
 
 use gl::types::{GLuint, GLint, GLchar};
 
@@ -33,6 +32,11 @@ fn main() {
     let mut rotatex:f32 = 0.0;
     let mut rotatey:f32 = 0.0;
     let mut rotate_ongoing:bool = false;
+
+    //System cursors
+    let syscursor:Cursor = Cursor::from_system(SystemCursor::Arrow).unwrap();
+    let rotatecursor:Cursor = Cursor::from_system(SystemCursor::Crosshair).unwrap();
+    syscursor.set();
 
     let vs = build_vertex_shader();
     let fs0 = build_fragment_shader(0);
@@ -63,6 +67,7 @@ fn main() {
                 Event::MouseButtonDown {mouse_btn:mouseb, x:_mousex, y:_mousey, .. } => {
                     if MouseButton::Middle == mouseb {                        
                         rotate_ongoing = true;
+                        rotatecursor.set();
                     }
                 }
                 Event::MouseButtonUp {mouse_btn:mouseb, x:mousex, y:mousey, .. } => {
@@ -71,15 +76,16 @@ fn main() {
                     }
                     if MouseButton::Middle == mouseb {
                         rotate_ongoing = false;
+                        syscursor.set();
                     }
                 }
                 Event::MouseMotion {xrel:mousex, yrel:mousey, .. } => {
                     if rotate_ongoing {
-                        rotatey = rotatey + mousex as f32;
+                        rotatey = rotatey + (mousex as f32) * 0.25;
                         if rotatey > 360.0 { rotatey = rotatey - 360.0; }
                         if rotatey < 0.0 { rotatey = 360.0 - rotatey; }
                         //TODO: rotatex/mousey
-                        rotatex = rotatex + mousey as f32;
+                        rotatex = rotatex + (mousey as f32) * 0.25;
                         if rotatex > 360.0 { rotatex = rotatex - 360.0; }
                         if rotatex < 0.0 { rotatex = 360.0 - rotatex;}
                     }
@@ -93,7 +99,11 @@ fn main() {
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
 
-        draw_checkerboard(rotatex, rotatey, 1.0, 1.0, prog0, prog1);
+        for x in -3..=3 {
+            for z in -3..=3 {
+                draw_checkerboard(rotatex, rotatey, (x as f32) * 2.0, (z as f32) * 2.0, prog0, prog1);
+            }
+        }
 
         window.gl_swap_window();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); //60fps
@@ -310,7 +320,7 @@ fn build_vertex_shader() -> GLuint {
     void main (){
         vec4 vertex = vec4(vertexPos, 1.0);
 
-        float fovVertical = 70.0;
+        float fovVertical = 50.0;
         float aspectRatio = 800.0/600.0;
         float zNear = 1.0;
         float zFar = 100.0;
