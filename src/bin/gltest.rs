@@ -91,118 +91,137 @@ fn main() {
         unsafe {
             gl::ClearColor(0.0, 0.5, 0.5, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
-
-            let vertices: Vec<f32> = vec![0.0, 0.0, 0.0,
-                                          0.0, 0.0, -1.0,
-                                          1.0, 0.0, -1.0,
-                                          
-                                          0.0, 0.0, 0.0,
-                                          1.0, 0.0, -1.0,
-                                          1.0, 0.0, 0.0,
-                                          
-                                          0.0, 0.0, 0.0,
-                                          0.0, 0.0, 1.0,
-                                          -1.0, 0.0, 1.0,
-                                          
-                                          0.0, 0.0, 0.0,
-                                          -1.0, 0.0, 1.0,
-                                          -1.0, 0.0, 0.0,]; //12
-                                        
-            let vertices2: Vec<f32> = vec![0.0, 0.0, 0.0,
-                                          -1.0, 0.0, 0.0,
-                                          -1.0, 0.0, -1.0,
-                                          
-                                          0.0, 0.0, 0.0,
-                                          -1.0, 0.0, -1.0,
-                                          0.0, 0.0, -1.0,
-                                          
-                                          0.0, 0.0, 0.0,
-                                          0.0, 0.0, 1.0,
-                                          1.0, 0.0, 1.0,
-                                          
-                                          0.0, 0.0, 0.0,
-                                          1.0, 0.0, 1.0,
-                                          1.0, 0.0, 0.0,]; //12
-
-            // vertices
-            let mut vertexarrayid: GLuint = 0;
-            gl::GenVertexArrays(1, &mut vertexarrayid);
-            gl::BindVertexArray(vertexarrayid);
-            //println!("VertexArrayId: {vertexarrayid}");
-
-            let mut vertexbuffer: GLuint = 0;
-            gl::GenBuffers(1, &mut vertexbuffer);
-            gl::BindBuffer(gl::ARRAY_BUFFER, vertexbuffer);
-            //println!("VertexBufferId: {vertexbuffer}");
-            
-            gl::EnableVertexAttribArray(0); //index
-            gl::VertexAttribPointer(
-                                    0, //index
-                                    3,
-                                    gl::FLOAT,
-                                    gl::FALSE,
-                                    0,
-                                    std::ptr::null()
-            );
-            
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                (vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, //size in bytes
-                vertices.as_ptr() as *const gl::types::GLvoid, //pointer
-                gl::STATIC_DRAW,
-            );
-
-            gl::UseProgram(prog0);
-            gl::Uniform2f(0, rotatex, rotatey);
-            gl::DrawArrays(gl::TRIANGLES, 0, 12);
-            gl::DisableVertexAttribArray(0);
-
-            //release stuff
-            gl::DeleteVertexArrays(1, &mut vertexarrayid);
-            gl::DeleteBuffers(1, &mut vertexbuffer);
-
-            //vertices2
-            let mut vertexarrayid2: GLuint = 0;
-            gl::GenVertexArrays(1, &mut vertexarrayid);
-            gl::BindVertexArray(vertexarrayid);
-            //println!("VertexArrayId: {vertexarrayid}");
-
-            let mut vertexbuffer2: GLuint = 0;
-            gl::GenBuffers(1, &mut vertexbuffer);
-            gl::BindBuffer(gl::ARRAY_BUFFER, vertexbuffer);
-            //println!("VertexBufferId: {vertexbuffer}");
-            
-            gl::EnableVertexAttribArray(0); //index
-            gl::VertexAttribPointer(
-                                    0, //index
-                                    3,
-                                    gl::FLOAT,
-                                    gl::FALSE,
-                                    0,
-                                    std::ptr::null()
-            );
-            
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                (vertices2.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, //size in bytes
-                vertices2.as_ptr() as *const gl::types::GLvoid, //pointer
-                gl::STATIC_DRAW,
-            );
-
-            gl::UseProgram(prog1);
-            gl::Uniform2f(0, rotatex, rotatey);
-            gl::DrawArrays(gl::TRIANGLES, 0, 12);
-            gl::DisableVertexAttribArray(0);
-            
-            //release more stuff
-            gl::DeleteVertexArrays(1, &mut vertexarrayid2);
-            gl::DeleteBuffers(1, &mut vertexbuffer2);
         }
 
+        draw_checkerboard(rotatex, rotatey, 1.0, 1.0, prog0, prog1);
+
         window.gl_swap_window();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); //60
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60)); //60fps
     }
 
+}
+
+fn draw_checkerboard(rotatex:f32, rotatey:f32, offsetx:f32, offsetz:f32, prog0:GLuint, prog1:GLuint)
+{
+    let verts: Vec<f32> = vec![ 0.0, 0.0, 0.0,
+                                0.0, 0.0, -1.0,
+                                1.0, 0.0, -1.0,
+
+                                0.0, 0.0, 0.0,
+                                1.0, 0.0, -1.0,
+                                1.0, 0.0, 0.0,
+
+                                0.0, 0.0, 0.0,
+                                0.0, 0.0, 1.0,
+                                -1.0, 0.0, 1.0,
+
+                                0.0, 0.0, 0.0,
+                                -1.0, 0.0, 1.0,
+                                -1.0, 0.0, 0.0,]; //12
+
+    let verts2: Vec<f32> = vec![ 0.0, 0.0, 0.0,
+                                -1.0, 0.0, 0.0,
+                                -1.0, 0.0, -1.0,
+
+                                0.0, 0.0, 0.0,
+                                -1.0, 0.0, -1.0,
+                                0.0, 0.0, -1.0,
+
+                                0.0, 0.0, 0.0,
+                                0.0, 0.0, 1.0,
+                                1.0, 0.0, 1.0,
+
+                                0.0, 0.0, 0.0,
+                                1.0, 0.0, 1.0,
+                                1.0, 0.0, 0.0,]; //12
+
+    //offset
+    let mut vertices: Vec<f32> = Vec::with_capacity(36);
+    let mut vertices2: Vec<f32> = Vec::with_capacity(36);
+    for i in 0..12 {
+        vertices.push(verts[i * 3 + 0] + offsetx);
+        vertices.push(0.0);
+        vertices.push(verts[i * 3 + 2] + offsetz);
+        vertices2.push(verts2[i * 3 + 0] + offsetx);
+        vertices2.push(0.0);
+        vertices2.push(verts2[i * 3 + 2] + offsetz);
+    }
+
+    unsafe {
+        // vertices
+        let mut vertexarrayid: GLuint = 0;
+        gl::GenVertexArrays(1, &mut vertexarrayid);
+        gl::BindVertexArray(vertexarrayid);
+        //println!("VertexArrayId: {vertexarrayid}");
+
+        let mut vertexbuffer: GLuint = 0;
+        gl::GenBuffers(1, &mut vertexbuffer);
+        gl::BindBuffer(gl::ARRAY_BUFFER, vertexbuffer);
+        //println!("VertexBufferId: {vertexbuffer}");
+
+        gl::EnableVertexAttribArray(0); //index
+        gl::VertexAttribPointer(
+        0, //index
+        3,
+        gl::FLOAT,
+        gl::FALSE,
+        0,
+        std::ptr::null()
+        );
+
+        gl::BufferData(
+        gl::ARRAY_BUFFER,
+        (vertices.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, //size in bytes
+        vertices.as_ptr() as *const gl::types::GLvoid, //pointer
+        gl::STATIC_DRAW,
+        );
+
+        gl::UseProgram(prog0);
+        gl::Uniform2f(0, rotatex, rotatey);
+        gl::DrawArrays(gl::TRIANGLES, 0, 12);
+        gl::DisableVertexAttribArray(0);
+
+        //release stuff
+        gl::DeleteVertexArrays(1, &mut vertexarrayid);
+        gl::DeleteBuffers(1, &mut vertexbuffer);
+
+        //vertices2
+        let mut vertexarrayid2: GLuint = 0;
+        gl::GenVertexArrays(1, &mut vertexarrayid);
+        gl::BindVertexArray(vertexarrayid);
+        //println!("VertexArrayId: {vertexarrayid}");
+
+        let mut vertexbuffer2: GLuint = 0;
+        gl::GenBuffers(1, &mut vertexbuffer);
+        gl::BindBuffer(gl::ARRAY_BUFFER, vertexbuffer);
+        //println!("VertexBufferId: {vertexbuffer}");
+
+        gl::EnableVertexAttribArray(0); //index
+        gl::VertexAttribPointer(
+        0, //index
+        3,
+        gl::FLOAT,
+        gl::FALSE,
+        0,
+        std::ptr::null()
+        );
+
+        gl::BufferData(
+        gl::ARRAY_BUFFER,
+        (vertices2.len() * std::mem::size_of::<f32>()) as gl::types::GLsizeiptr, //size in bytes
+        vertices2.as_ptr() as *const gl::types::GLvoid, //pointer
+        gl::STATIC_DRAW,
+        );
+
+        gl::UseProgram(prog1);
+        gl::Uniform2f(0, rotatex, rotatey);
+        gl::DrawArrays(gl::TRIANGLES, 0, 12);
+        gl::DisableVertexAttribArray(0);
+
+        //release more stuff
+        gl::DeleteVertexArrays(1, &mut vertexarrayid2);
+        gl::DeleteBuffers(1, &mut vertexbuffer2);
+    }
 }
 
 fn build_vertex_shader() -> GLuint {
