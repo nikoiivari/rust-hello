@@ -1,0 +1,7 @@
+<comment> ::= "#"
+<whitespace> ::= " " | "\t" | <comment>
+<program> ::= <line>+
+<line> ::= <codeline> | <emptyline>
+<codeline> ::= <instruction> <whitespace>+ "\n" | <instruction> "\n" | <instruction>
+<emptyline> ::= <whitespace>+ "\n" | "\n" | <whitespace>+
+<instruction> ::= "add" | "sub"
