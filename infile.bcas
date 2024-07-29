@@ -1,0 +1,8 @@
+
+# accumulate constant, accumulate from memory, using two's complement addition.
+.stuv + 100
+.stuv + cap
+
+# With a pseudoinstruction you could sum up a range of memory.
+
+# 
