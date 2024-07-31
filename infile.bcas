@@ -27,4 +27,21 @@ cap2.stuvwxyz = .stuvwxyz           # store 64bits (8byte) to memory from accumu
 cap2.stuvwxyz =                     # the exact same instruction as previous line
 cap2 =                              # the exact same instruction as previous line
 
-# use bitfields to do subtraction on 16bit integers in memory
+# use bitfields to do subtraction on 32bit integers in memory
+
+
+# use bitfields to set pixels in the tiler
+
+
+# jump based on byte-swizzle specific carry-flag
+.z + 256                            # set carry flag for .z
+carry .z cap_code1                  # branch on carry flag set for .z
+
+# jump based on byte-swizzle specific zero-flag
+.s = 100
+.s - 100                            # set zero flag for .s
+zero .s cap_code2                   # branch on zero flag set for .s
+
+# force a jump by explicitly setting overflow flag for .s in status register
+.O or 10000000b                    # .NOBITZUC is the status register
+over .s cap_code3
