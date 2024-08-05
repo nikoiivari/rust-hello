@@ -1,3 +1,4 @@
+# Have capabilities work on one byte granularity with swizzles
 
 # add constant to accumulator, then add from memory, using two's complement addition.
 .stuv + 100
