@@ -1,3 +1,10 @@
+# Capabilities 
+allcaps = $             # full cache access capability
+pagecap = $[1]          # single page capability
+pagerange = $[2-3]      # page range capability
+rangecap = $[0][0-4]    # range of words 0 to 4 in page 0
+rswizzle = $[0][5].ghij # bytes .ghij from word 5 in page 0
+
 # Have capabilities work on one byte granularity with swizzles
 
 # add constant to accumulator, then add from memory, using two's complement addition.
