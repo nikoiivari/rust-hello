@@ -1,15 +1,18 @@
+# $-cache is inside mega-alu
+
 # Capabilities 
 allcaps = $             # full cache access capability
 pagecap = $[1]          # single page capability
-pagerange = $[2-3]      # page range capability
+pagerange = $[3-5]      # continous page range capability
+discrange = $[2, 6-7]   # discontinous page range capability
 rangecap = $[0][0-4]    # range of words 0 to 4 in page 0
-rswizzle = $[0][5].ghij # bytes .ghij from word 5 in page 0
+rswizzle = $[0][5].stuv # bytes .stuv from doubleword 5 in page 0
 
 # Have capabilities work on one byte granularity with swizzles
 
 # add constant to accumulator, then add from memory, using two's complement addition.
-.stuv + 100
-.stuv + cap.stuv
+@.stuv + 100
+@.stuv + cap.stuv
 
 # With a pseudoinstruction you could potentially sum up a range of memory.
 
@@ -51,5 +54,5 @@ carry .z cap_code1                  # branch on carry flag set for .z
 zero .s cap_code2                   # branch on zero flag set for .s
 
 # force a jump by explicitly setting overflow flag for .s in status register
-.O or 10000000b                    # .NOBITZUC is the status register
+.O or 10000000b                     # .NOBITZUC is the status register
 over .s cap_code3
