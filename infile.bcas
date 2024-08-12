@@ -1,31 +1,33 @@
 # @-accumulator is inside mega-alu
 # $-cache is outside mega-alu
 
-# @-registers inside meg-alu have built in SIMD ops which take effect over a range
+# @-registers inside mega-alu have built in SIMD ops which take effect over a range
 
+# Have capabilities work on one byte granularity with swizzles
 
 # Accum capabilities
 accumallcaps = @                # assign full accumulator access capability
 accumspecificpage = @01fh:      # assign a specific page capability
-accumspecificreg = @020h:01h    # assign a specific register 01h from page 020h 
+accumspecificreg = @020h:01h    # assign a specific register 01h from page 020h
+accumrangereg = @020h:02h-04h   # assign a range of registers from page 020h
+accumswizzle = @020h:05h-06h.st # assign a range of two most significant bytes from registers 05h
+                                # and 06h in page 020h
 
 # Cache capabilities
 cacheallcaps = $                # assign full cache access capability
 cachespecificpage = $008h:      # assign a specific page capability
-pagecap = $[1]          # single page capability
-pagerange = $[3]        # continous three-page range capability
-discrange = $[2, 6-7]   # discontinous page range capability
-rangecap = $[0][0-4]    # range of words 0 to 4 in page 0
-rswizzle = $[0][5].stuv # bytes .stuv from doubleword 5 in page 0
+cachepagerange = $009h-00bh:    # continous three-page range capability
 
-# Allocation and virtual memory?
+# Examples of memory access...
+
+# Examples of passing parameters when branching...
+
+# Extension for allocation and virtual memory?
 accumallocpagecap = @(1)        # assign a single allocated page capability - needs some method
                                 # to check if allocation failed
 accumallocpagerange = @(3)      # assign a range of three (3) allocated pages - needs some method
                                 # to check if allocation failed
 cacheallocpagerange = $(2)      # same as above, but allocating from cache - not accumulator.
-
-# Have capabilities work on one byte granularity with swizzles
 
 # add constant to accumulator, then add from memory, using two's complement addition.
 @.stuv + 100
