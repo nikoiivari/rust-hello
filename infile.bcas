@@ -75,3 +75,44 @@ zero .s cap_code2                   # branch on zero flag set for .s
 # force a jump by explicitly setting overflow flag for .s in status register
 .O or 10000000b                     # .NOBITZUC is the status register
 over .s cap_code3
+
+# Varying size instructions, and packing them into 8byte doublewords
+
+## 1byte mini instruction
+
+1byte mini instruction bits:
+
+|bit 6-7: |bit 0-5:                     |
+|----|----|----|----|----|----|----|----|
+| i.type  | opcode                      |
+
+The two most significant bits convey the instruction type. In this case 11b. The different
+posibilities for these bits are:
+
+| i.type       | Meaning                   |
+|--------------|---------------------------|
+| i.type = 11b | 1byte mini instruction    |
+| i.type = 10b | 2byte 16bit instruction   |
+| i.type = 01b | 6byte 48bit instruction   |
+| i.type = 00b | 8byte mega instruction    |
+
+The 6bit opcode field can specify opcode 0-63
+
+| opcode  | Functionality                                                    |
+|---------|------------------------------------------------------------------|
+| 000000b | padding, can often be optimised out without wasting a full cycle |
+| 000001b | nop -- No Operation. spends 1 clock cycle                        |
+| 000010b | +, add -- Addition on the accum range...                         |
+
+Many of the 1byte mini instructions work on accumulator ranges that have been previously
+specified by an 8byte mega instruction. Mini instructions may not modify the current range
+capability, so that later mini instructions can also operate on that range.
+
+## 2byte 16bit instruction
+
+## 6byte 48bit instruction
+
+## 8byte mega instruction
+
+It may be possible to only have 48bit mega instructions...?
+Just pad them on the left or the right side.
