@@ -106,6 +106,12 @@ are swizzles on top of those.
 - source reg1           8bits
 - source reg2           8bits
 - source swizzles       8bits
+- opcode               12bits
+-                    = 84bits in total
+
+How to pack these into instructions?
+
+
 
 1byte mini instructions work on current range capability, so they don't need parameter
 fields. Opcode only.
