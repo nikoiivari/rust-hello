@@ -3,7 +3,8 @@
 `@` accumulator is inside mega-alu
 `$` cache is outside mega-alu
 
-`@` registers inside mega-alu have built in SIMD ops which take effect over a range
+`@` registers inside mega-alu have built in SIMD ops which take effect over a range.
+`$` code can be executed from cache, not from accumulator.
 
 # Have capabilities work on one byte granularity with swizzles
 
