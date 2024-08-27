@@ -16,17 +16,17 @@ fn test_4bit_nand_adder(ina:u64, inb:u64) -> (u64, u64)
     let mut cout:u64 = 0;
     
     for i in 0..=3 {
-        let inamm = ina & (0b1<<i);
-        let inam = inamm >> i;
-        let inbmm = inb & (0b1<<i);
-        let inbm = inbmm >> i;
+        //let inam = ina & (0b1<<i);
+        //let inam = inamm >> i;
+        //let inbm = inb & (0b1<<i);
+        //let inbm = inbmm >> i;
         
-        let tmp1 = nand(inam, inbm);
+        let tmp1 = nand(ina, inb);
         println!("tmp1: {tmp1:#b}");
 
-        let tmp2 = nand(inam, tmp1);
+        let tmp2 = nand(ina, tmp1);
         println!("tmp2: {tmp2:#b}");
-        let tmp3 = nand(inbm, tmp1);
+        let tmp3 = nand(inb, tmp1);
         println!("tmp3: {tmp3:#b}");
 
         let tmp4 = nand(tmp2, tmp3);
@@ -47,7 +47,8 @@ fn test_4bit_nand_adder(ina:u64, inb:u64) -> (u64, u64)
         println!("tmp9cout: {tmp9cout:#b}");
 
         sum = tmp8sum & 0b1;
-        sum = sum<<1;
+        sum = tmp8sum;
+        //sum = sum<<1;
 
         cin = tmp9cout; // carry over to next loop
         cout = tmp9cout;
