@@ -4,7 +4,8 @@
 `$` cache is outside mega-alu
 
 `@` registers inside mega-alu have built in SIMD ops which take effect over a range.
-`$` code can be executed from cache, not from accumulator.
+Code can be executed from cache. Perhaps compressed code can be decompressed, and also
+executed from accumulator registers.
 
 # Have capabilities work on one byte granularity with swizzles
 
