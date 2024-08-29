@@ -7,6 +7,12 @@
 Code can be executed from cache. Perhaps compressed code can be decompressed, and also
 executed from accumulator registers.
 
+Four parallell execution units can be configured in three ways:
+
+- four indipendent master threads
+- one master thread, one slave thread (two pairs per core)
+- one master thread, three slave threads
+
 # Have capabilities work on one byte granularity with swizzles
 
 # Accum capabilities
