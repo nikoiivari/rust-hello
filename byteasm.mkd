@@ -13,6 +13,8 @@ Four parallell execution units can be configured in three ways:
 - one master thread, one slave thread (two pairs per core)
 - one master thread, three slave threads
 
+...or maybe use swizzles for parallel execution? What about 
+
 # Have capabilities work on one byte granularity with swizzles
 
 # Accum capabilities
@@ -34,10 +36,6 @@ cachespecificpage = $008h:      # assign a specific page capability
 cachepagerange = $009h-00bh:    # continous three-page range capability
 ```
 
-# Examples of memory access...
-
-# Examples of passing parameters when branching...
-
 # Extension for allocation and virtual memory?
 
 ```
@@ -51,8 +49,6 @@ cacheallocpagerange = $(2)      # same as above, but allocating from cache - not
 # add constant to accumulator, then add from memory, using two's complement addition.
 @.stuv + 100
 @.stuv + cap.stuv
-
-# With a pseudoinstruction you could potentially sum up a range of memory.
 
 # subtract from accumulator
 .stuv - 100
@@ -83,17 +79,28 @@ cap2 =                              # the exact same instruction as previous lin
 
 
 # jump based on byte-swizzle specific carry-flag
+Perhaps use predicates to not have any jump instructions at all?
+
 .z + 256                            # set carry flag for .z
-carry .z cap_code1                  # branch on carry flag set for .z
+oncarry .z cap_code1                # branch on carry flag set for .z
+
+Perhaps use an instruction to set predicates for the next n number of instructions?
+Or perhaps just prefix the line with `oncarry`.
+
+.s + 250                # carry flag will be set if .s + 250 is more than 255.
+oncarry .s @.yz + 64
+oncarry .s @.wx + 255
+$.wx = @.wx             # this instruction is not executed if carry bit for .s is set.
+oncarry .s 
 
 # jump based on byte-swizzle specific zero-flag
 .s = 100
 .s - 100                            # set zero flag for .s
-zero .s cap_code2                   # branch on zero flag set for .s
+onzero .s cap_code2                 # branch on zero flag set for .s
 
 # force a jump by explicitly setting overflow flag for .s in status register
 .O or 10000000b                     # .NOBITZUC is the status register
-over .s cap_code3
+onover .s cap_code3
 
 # General instruction format
 
