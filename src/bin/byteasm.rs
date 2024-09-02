@@ -23,8 +23,8 @@ fn test_2bit_nand_adder(ina:u64, inb:u64) -> (u64, u64)
     println!("inbbit1: {inbbit1:#b}");
 
     let mut cin:u64 = 0;
-    let mut sum:u64 = 0; 
-    let mut cout:u64 = 0;
+    let mut sum:u64; 
+    let cout:u64;
 
         {
         // 1-bit adder begins
@@ -110,7 +110,7 @@ fn main ()
     let args: Vec<String> = env::args().collect();
     if 1 < args.len()
     {
-        //println!("{:?}", args);
+        println!("{:?}", args);
         //let infilepath = &args[1];
         //let infile = File::open(infilepath).unwrap();
     }
