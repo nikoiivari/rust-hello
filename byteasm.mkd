@@ -87,11 +87,15 @@ oncarry .z cap_code1                # branch on carry flag set for .z
 Perhaps use an instruction to set predicates for the next n number of instructions?
 Or perhaps just prefix the line with `oncarry`.
 
-.s + 250                # carry flag will be set if .s + 250 is more than 255.
+.s + 250                # carry flag for .s will be set if .s + 250 is more than 255.
 oncarry .s @.yz + 64
 oncarry .s @.wx + 255
 $.wx = @.wx             # this instruction is not executed if carry bit for .s is set.
-oncarry .s 
+oncarry .s
+
+But... then you can not include .s in the additions on the following lines for fear that
+the .s carry bit might be cleared. This would then prevent the execution of the following
+lines that start with `oncarry .s`.
 
 # jump based on byte-swizzle specific zero-flag
 .s = 100
