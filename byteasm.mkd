@@ -13,11 +13,11 @@ Four parallell execution units can be configured in three ways:
 - one master thread, one slave thread (two pairs per core)
 - one master thread, three slave threads
 
-...or maybe use swizzles for parallel execution? What about 
+...or maybe use swizzles for parallel execution?
 
 # Have capabilities work on one byte granularity with swizzles
 
-# Accum capabilities
+## Accum capabilities
 
 ```
 accumallcaps = @                # assign full accumulator access capability
@@ -28,7 +28,7 @@ accumswizzle = @020h:05h-06h.st # assign a range of two most significant bytes f
                                 # and 06h in page 020h
 ```
 
-# Cache capabilities
+## Cache capabilities
 
 ```
 cacheallcaps = $                # assign full cache access capability
@@ -36,7 +36,7 @@ cachespecificpage = $008h:      # assign a specific page capability
 cachepagerange = $009h-00bh:    # continous three-page range capability
 ```
 
-# Extension for allocation and virtual memory?
+## Extension for allocation and virtual memory?
 
 ```
 accumallocpagecap = @(1)        # assign a single allocated page capability - needs some method
@@ -46,15 +46,18 @@ accumallocpagerange = @(3)      # assign a range of three (3) allocated pages - 
 cacheallocpagerange = $(2)      # same as above, but allocating from cache - not accumulator.
 ```
 
-# add constant to accumulator, then add from memory, using two's complement addition.
+## add constant to accumulator, then add from memory, using two's complement addition.
+
 @.stuv + 100
 @.stuv + cap.stuv
 
-# subtract from accumulator
+## subtract from accumulator
+
 .stuv - 100
 .stuv - cap.wxyz
 
-# use swizzle to do subtraction on 16bit integers in accumulator
+## use swizzle to do subtraction on 16bit integers in accumulator
+
 .stuvwxyz = cap2.stuvwxyz           # load 64bits (8byte) from memory to accumulator
 = cap2.stuvwxyz                     # the exact same instruction as previous line
 = cap2                              # the exact same instruction as previous line
@@ -72,13 +75,10 @@ cap2.stuvwxyz = .stuvwxyz           # store 64bits (8byte) to memory from accumu
 cap2.stuvwxyz =                     # the exact same instruction as previous line
 cap2 =                              # the exact same instruction as previous line
 
-# use bitfields to do subtraction on 32bit integers in memory
+# Branching or predicates?
 
+## jump based on byte-swizzle specific carry-flag
 
-# use bitfields to set pixels in the tiler
-
-
-# jump based on byte-swizzle specific carry-flag
 Perhaps use predicates to not have any jump instructions at all?
 
 .z + 256                            # set carry flag for .z
@@ -93,16 +93,19 @@ oncarry .s @.wx + 255
 $.wx = @.wx             # this instruction is not executed if carry bit for .s is set.
 oncarry .s
 
-But... then you can not include .s in the additions on the following lines for fear that
+But.. then you can not include .s in the additions on the following lines for fear that
 the .s carry bit might be cleared. This would then prevent the execution of the following
-lines that start with `oncarry .s`.
+lines that start with oncarry .s.
 
-# jump based on byte-swizzle specific zero-flag
+Also, what register or memory address is the .s swizzle referring to?
+
+## jump based on byte-swizzle specific zero-flag
+
 .s = 100
 .s - 100                            # set zero flag for .s
 onzero .s cap_code2                 # branch on zero flag set for .s
 
-# force a jump by explicitly setting overflow flag for .s in status register
+## force a jump by explicitly setting overflow flag for .s in status register
 .O or 10000000b                     # .NOBITZUC is the status register
 onover .s cap_code3
 
@@ -130,14 +133,8 @@ are swizzles on top of those.
 
 How to pack these into instructions?
 
-
-
 1byte mini instructions work on current range capability, so they don't need parameter
 fields. Opcode only.
-
-
-
-
 
 # Varying size instructions, and packing them into 8byte doublewords
 
