@@ -48,16 +48,21 @@ cacheallocpagerange = $(2)      # same as above, but allocating from cache - not
 
 ## add constant to accumulator, then add from memory, using two's complement addition.
 
+```
 @.stuv + 100
 @.stuv + cap.stuv
+```
 
 ## subtract from accumulator
 
+```
 .stuv - 100
 .stuv - cap.wxyz
+```
 
 ## use swizzle to do subtraction on 16bit integers in accumulator
 
+```
 .stuvwxyz = cap2.stuvwxyz           # load 64bits (8byte) from memory to accumulator
 = cap2.stuvwxyz                     # the exact same instruction as previous line
 = cap2                              # the exact same instruction as previous line
@@ -74,6 +79,7 @@ cacheallocpagerange = $(2)      # same as above, but allocating from cache - not
 cap2.stuvwxyz = .stuvwxyz           # store 64bits (8byte) to memory from accumulator
 cap2.stuvwxyz =                     # the exact same instruction as previous line
 cap2 =                              # the exact same instruction as previous line
+```
 
 # Branching or predicates?
 
