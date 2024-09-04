@@ -121,9 +121,8 @@ onzero .s cap_code2                 # branch on zero flag set for .s
 
 ```
 .O or 10000000b                     # .NOBITZUC is the status register
-onover .s cap_code3
+onoverflow .s cap_code3
 ```
-
 # General instruction format
 
 What fields are needed in each type of instruction?
@@ -135,21 +134,35 @@ Destination and source are capabilities. There are four types of cache capabilit
 capabilities: `@`, `@page:`, `@page:register`, `@page:register-range`. And then there
 are swizzles on top of those.
 
-- destination page     12bits
+- destination page1    12bits
 - destination reg1      8bits
+- destination page2    12bits
 - destination reg2      8bits
 - destination swizzles  8bits
-- source page          12bits
+- source page1         12bits
 - source reg1           8bits
+- source page2         12bits
 - source reg2           8bits
 - source swizzles       8bits
-- opcode               12bits
--                    = 84bits in total
+- opcode               12bits = 108bits in total
 
 How to pack these into instructions?
 
 1byte mini instructions work on current range capability, so they don't need parameter
-fields. Opcode only.
+fields. Opcode only. So there is a need for @-capability register and $-capability register.
+these capability registers need to hold the following
+
+range capability:
+
+- page1    12bits
+- reg1      8bits
+- page2    12bits
+- reg2      8bits = 40bits
+- swizzles  8bits = 48bits in total
+
+- unused   16bits (out of 64bits)
+
+This defines a range of page1:reg1 to page2:reg2.
 
 # Varying size instructions, and packing them into 8byte doublewords
 
@@ -168,7 +181,7 @@ posibilities for these bits are:
 |--------------|---------------------------|
 | i.type = 11b | 1byte mini instruction    |
 | i.type = 10b | 2byte 16bit instruction   |
-| i.type = 01b | 4byte 48bit instruction   |
+| i.type = 01b | 6byte 48bit instruction   |
 | i.type = 00b | 8byte mega instruction    |
 
 The 6bit opcode field can specify opcode 0-63
