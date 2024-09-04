@@ -144,7 +144,7 @@ are swizzles on top of those.
 - source page2         12bits
 - source reg2           8bits
 - source swizzles       8bits
-- opcode               12bits = 108bits in total
+- opcode               14bits = 110bits in total
 
 How to pack these into instructions?
 
