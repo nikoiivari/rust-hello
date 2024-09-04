@@ -33,3 +33,13 @@ fn main ()
         println!("{}", s);
     }
 }
+
+// line -- separate a line to a separate string
+fn line (mut s:String) -> (String, String) {
+    ("foo".to_string(), "bar".to_string())
+}
+
+// code -- separate code from the comment at the end of the line
+fn code (mut s:String) -> (String, String) {
+    ("foo".to_string(), "bar".to_string())
+}
