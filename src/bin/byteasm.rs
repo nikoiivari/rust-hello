@@ -27,16 +27,26 @@ fn main ()
         let mut s: String = Default::default();
         let _ = infile.read_to_string(&mut s);
 
-        //for line in reader.lines() {
-        //    println!("{:?}", line);
-        //}
-        println!("{}", s);
-    }
-}
+        for line in s.lines() {
+            //println!("{:?}", line);
+            let code:String;
+            // separate code from a posible comment at the end of line     
+            if line.contains('#') {
+                let v:Vec<&str> = line.split('#').collect();
+                code = v[0].to_string();
+                //println!("{:?}", code);
+            } else {
+                code = line.to_string();
+                //println!("{:?}", code);
+            }
 
-// line -- separate a line to a separate string
-fn line (mut s:String) -> (String, String) {
-    ("foo".to_string(), "bar".to_string())
+            // parse instruction
+            if "" != code {
+                println!("{:?}", code);
+            } // else an empty code -- ignore empty code
+        }
+        //println!("{}", s);
+    }
 }
 
 // code -- separate code from the comment at the end of the line
