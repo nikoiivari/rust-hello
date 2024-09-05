@@ -48,16 +48,21 @@ cacheallocpagerange = $(2)      # same as above, but allocating from cache - not
 
 ## add constant to accumulator, then add from memory, using two's complement addition.
 
+```
 @.stuv + 100
 @.stuv + cap.stuv
+```
 
 ## subtract from accumulator
 
+```
 .stuv - 100
 .stuv - cap.wxyz
+```
 
 ## use swizzle to do subtraction on 16bit integers in accumulator
 
+```
 .stuvwxyz = cap2.stuvwxyz           # load 64bits (8byte) from memory to accumulator
 = cap2.stuvwxyz                     # the exact same instruction as previous line
 = cap2                              # the exact same instruction as previous line
@@ -74,6 +79,7 @@ cacheallocpagerange = $(2)      # same as above, but allocating from cache - not
 cap2.stuvwxyz = .stuvwxyz           # store 64bits (8byte) to memory from accumulator
 cap2.stuvwxyz =                     # the exact same instruction as previous line
 cap2 =                              # the exact same instruction as previous line
+```
 
 # Branching or predicates?
 
@@ -105,14 +111,18 @@ Also, what register or memory address is the .s swizzle referring to?
 
 ## jump based on byte-swizzle specific zero-flag
 
+```
 .s = 100
 .s - 100                            # set zero flag for .s
 onzero .s cap_code2                 # branch on zero flag set for .s
+```
 
 ## force a jump by explicitly setting overflow flag for .s in status register
-.O or 10000000b                     # .NOBITZUC is the status register
-onover .s cap_code3
 
+```
+.O or 10000000b                     # .NOBITZUC is the status register
+onoverflow .s cap_code3
+```
 # General instruction format
 
 What fields are needed in each type of instruction?
@@ -124,21 +134,35 @@ Destination and source are capabilities. There are four types of cache capabilit
 capabilities: `@`, `@page:`, `@page:register`, `@page:register-range`. And then there
 are swizzles on top of those.
 
-- destination page     12bits
+- destination page1    12bits
 - destination reg1      8bits
+- destination page2    12bits
 - destination reg2      8bits
 - destination swizzles  8bits
-- source page          12bits
+- source page1         12bits
 - source reg1           8bits
+- source page2         12bits
 - source reg2           8bits
 - source swizzles       8bits
-- opcode               12bits
--                    = 84bits in total
+- opcode               14bits = 110bits in total
 
 How to pack these into instructions?
 
 1byte mini instructions work on current range capability, so they don't need parameter
-fields. Opcode only.
+fields. Opcode only. So there is a need for @-capability register and $-capability register.
+these capability registers need to hold the following
+
+range capability:
+
+- page1    12bits
+- reg1      8bits
+- page2    12bits
+- reg2      8bits = 40bits
+- swizzles  8bits = 48bits in total
+
+- unused   16bits (out of 64bits)
+
+This defines a range of page1:reg1 to page2:reg2.
 
 # Varying size instructions, and packing them into 8byte doublewords
 
@@ -157,7 +181,7 @@ posibilities for these bits are:
 |--------------|---------------------------|
 | i.type = 11b | 1byte mini instruction    |
 | i.type = 10b | 2byte 16bit instruction   |
-| i.type = 01b | 4byte 48bit instruction   |
+| i.type = 01b | 6byte 48bit instruction   |
 | i.type = 00b | 8byte mega instruction    |
 
 The 6bit opcode field can specify opcode 0-63
