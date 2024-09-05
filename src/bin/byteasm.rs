@@ -5,6 +5,33 @@ use std::env;
 use std::fs::File;
 use std::io::Read;
 
+#[derive(Debug)]
+struct Op {
+        opcode:u16,
+          dest:u32,
+}
+
+impl Op {
+    pub fn new(opcode:u16, dest:u32) -> Self {
+        Op {
+            opcode: opcode,
+              dest: dest,
+        }
+    }
+}
+
+#[derive(Debug)]
+struct Label {
+    label:String,
+}
+
+impl Label {
+    pub fn new() -> Self {
+        //...
+        label: ""
+    }
+}
+
 fn nand(ina:u64, inb:u64) -> u64
 {
     return !(ina & inb);
@@ -32,8 +59,8 @@ fn main ()
             let code:String;
             // separate code from a posible comment at the end of line     
             if line.contains('#') {
-                let v:Vec<&str> = line.split('#').collect();
-                code = v[0].to_string();
+                let (statement, _comment) = line.split_once('#').unwrap();
+                code = statement.to_string();
                 //println!("{:?}", code);
             } else {
                 code = line.to_string();
@@ -42,14 +69,25 @@ fn main ()
 
             // parse instruction
             if "" != code {
-                println!("{:?}", code);
+                let o:Op = parse_code(code, vars);
+                println!("{:?}", o);
             } // else an empty code -- ignore empty code
         }
         //println!("{}", s);
     }
 }
 
-// code -- separate code from the comment at the end of the line
-fn code (mut s:String) -> (String, String) {
-    ("foo".to_string(), "bar".to_string())
+// parse_code -- generate Op struct for code statement
+fn parse_code (code:String, var:Label) -> Op {
+    println!("{:?}", code);
+    // parse instruction here ...
+    let v: Vec<&str> = code.split(' ').collect(); // does this work with tabs?
+    if 0 < v.len() {
+        match v[0] {
+            //"foo" =>
+        }
+    }
+    
+    let o:Op = Op::new(0x0, 0x0);
+    o
 }
