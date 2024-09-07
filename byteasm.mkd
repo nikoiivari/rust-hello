@@ -148,6 +148,8 @@ are swizzles on top of those.
 
 How to pack these into instructions?
 
+65535 * 2048 = 134 Megabytes
+
 1byte mini instructions work on current range capability, so they don't need parameter
 fields. Opcode only. So there is a need for @-capability register and $-capability register.
 these capability registers need to hold the following
