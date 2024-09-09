@@ -50,7 +50,7 @@ cacheallocpagerange = $(2)      # same as above, but allocating from cache - not
 
 Using one's complement for signed integers gives us negative zero and positive zero.
 
-See: https://www.tutorialspoint.com/one-s-complement
+See: https://www.tutorialspoint.com/one-s-complement. Apparently you can get subtraction for the price of one NOT and two ADDs when carry bit is set, and two NOTs and one ADD when it isn't.
 
 
 ```
