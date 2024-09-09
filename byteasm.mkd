@@ -128,6 +128,20 @@ onzero .s cap_code2                 # branch on zero flag set for .s
 .O or 10000000b                     # .NOBITZUC is the status register
 onoverflow .s cap_code3
 ```
+
+## .NOBITZUC is the status register
+
+- .N Set if the result of an operation is a negative integer
+- .O Set on overflow
+- .B
+- .I
+- .T
+- .Z Set if the result of an operation is a zero. Also .N is set if zero is negative.
+- .U Undefined instruction?
+- .C Carry flag
+
+Prehaps Interrupts and Traps are .I and .T? What is .B?
+
 # General instruction format
 
 What fields are needed in each type of instruction?
