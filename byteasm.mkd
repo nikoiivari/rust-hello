@@ -46,7 +46,12 @@ accumallocpagerange = @(3)      # assign a range of three (3) allocated pages - 
 cacheallocpagerange = $(2)      # same as above, but allocating from cache - not accumulator.
 ```
 
-## add constant to accumulator, then add from memory, using two's complement addition.
+## add constant to accumulator, then add from memory, using one's complement addition.
+
+Using one's complement for signed integers gives us negative zero and positive zero.
+
+See: https://www.tutorialspoint.com/one-s-complement
+
 
 ```
 @.stuv + 100
