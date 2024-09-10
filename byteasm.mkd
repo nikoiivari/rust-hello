@@ -17,18 +17,24 @@ Four parallell execution units can be configured in three ways:
 
 # Have capabilities work on one byte granularity with swizzles
 
+
+
 ## Accum capabilities
+
+Direct memory access to accumulator
 
 ```
 accumallcaps = @                # assign full accumulator access capability
 accumspecificpage = @01fh:      # assign a specific page capability
 accumspecificreg = @020h:01h    # assign a specific register 01h from page 020h
-accumrangereg = @020h:02h-04h   # assign a range of registers from page 020h
-accumswizzle = @020h:05h-06h.st # assign a range of two most significant bytes from registers 05h
+accumrangereg = @020h:02h...04h # assign a range of registers from page 020h
+accswizzle = @020h:05h...06h.st # assign a range of two most significant bytes from registers 05h
                                 # and 06h in page 020h
 ```
 
 ## Cache capabilities
+
+Direct memory access to cache
 
 ```
 cacheallcaps = $                # assign full cache access capability
@@ -36,7 +42,26 @@ cachespecificpage = $008h:      # assign a specific page capability
 cachepagerange = $009h-00bh:    # continous three-page range capability
 ```
 
+## Indexing instead of direct memory access
+
+Square brackets `[` and `]` imply indexing -- not direct memory access.
+
+```
+@ = @[:0...3]       # page 0, registers from 0 to 3 inclusive. Four registers in total.
+@ = @[0...1:]       # pages from 0 to 1 inclusive. Two pages in total.
+```
+
+Indexing is a way for the program to access memory without knowing actual memory adressess.
+When a program starts it recieves a capability to the memory it can access, and this capability
+can be split off to sub-capabilities that control smaller sub-areas of that memory. Indexed
+memory areas are always continous -- no memory mapping of discontinous pages is done.
+
 ## Extension for allocation and virtual memory?
+
+If the syntatic sugar below was to be used, it would probably still just be calling
+OS systemcalls, or the equivalent of those, to allocate the memory, and pass the capability
+to the calling process. The assembler itself does not manage memory allocation beyond indexing
+as explained above.
 
 ```
 accumallocpagecap = @(1)        # assign a single allocated page capability - needs some method
@@ -168,6 +193,7 @@ are swizzles on top of those.
 How to pack these into instructions?
 
 65535 * 2048 = 134 Megabytes
+ 4096 * 2048 =   8 Megabytes
 
 1byte mini instructions work on current range capability, so they don't need parameter
 fields. Opcode only. So there is a need for @-capability register and $-capability register.
