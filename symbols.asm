@@ -8,15 +8,15 @@ req $[1/4:]     # require 1/4th of a page of cache to run (256/4 = 64)
 # Link in functions from other files or libraries
 # use thingamagadget.asm
 
-# main is a label, but the func keyword makes it a function label.
-func main:
-
 # Variable definitions in the scope of func main. These are similiar to labels,
 # and have a colon ':' after the variable name.
     accum   : .stuvwxyz,    8byte, capability
     cache   : .stuvwxyz,    8byte, capability
     foo     : .stuv,        4byte, unsigned
     bar     :     .wxyz,    4byte, unsigned # .wxyz gets packed into the previous dword.
+
+# main is a label, but the func keyword makes it a function label.
+func main:
 
 accum = @           # save accumulator
 @ = @[:0...3]       # Square brackets '[' and ']' imply indexing -- not direct memory access
