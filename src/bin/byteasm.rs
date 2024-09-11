@@ -26,9 +26,10 @@ struct Label {
 }
 
 impl Label {
-    pub fn new() -> Self {
-        //...
-        label: ""
+    pub fn new(label:String) -> Self {
+        Label {
+            label: label,
+        }
     }
 }
 
@@ -59,18 +60,21 @@ fn main ()
             let code:String;
             // separate code from a posible comment at the end of line     
             if line.contains('#') {
-                let (statement, _comment) = line.split_once('#').unwrap();
+                let (statement_untrimmed, _comment) = line.split_once('#').unwrap();
+                let statement = statement_untrimmed.trim();
                 code = statement.to_string();
-                //println!("{:?}", code);
+                println!("{:?}", code);
             } else {
-                code = line.to_string();
-                //println!("{:?}", code);
+                let line_trimmed = line.trim();
+                code = line_trimmed.to_string();
+                println!("{:?}", code);
             }
 
             // parse instruction
             if "" != code {
-                let o:Op = parse_code(code, vars);
-                println!("{:?}", o);
+                let o:Op; let l:Label;
+                (o, l) = parse_code(code);
+                println!("{:?}, {:?}", o, l);
             } // else an empty code -- ignore empty code
         }
         //println!("{}", s);
@@ -78,16 +82,18 @@ fn main ()
 }
 
 // parse_code -- generate Op struct for code statement
-fn parse_code (code:String, var:Label) -> Op {
-    println!("{:?}", code);
+fn parse_code (code:String) -> (Op, Label ) {
+    //println!("{:?}", code);
     // parse instruction here ...
     let v: Vec<&str> = code.split(' ').collect(); // does this work with tabs?
     if 0 < v.len() {
-        match v[0] {
+        //println!("{:?}", v[0]);
+        //match v[0] {
             //"foo" =>
-        }
+        //}
     }
     
     let o:Op = Op::new(0x0, 0x0);
-    o
+    let l:Label = Label::new("foo".to_string());
+    (o, l)
 }
