@@ -17,9 +17,9 @@ Four parallell execution units can be configured in three ways:
 
 # Have capabilities work on one byte granularity with swizzles
 
+## Direct memory access through capabilities
 
-
-## Accum capabilities
+### Accum capabilities
 
 Direct memory access to accumulator
 
@@ -32,7 +32,7 @@ accswizzle = @020h:05h...06h.st # assign a range of two most significant bytes f
                                 # and 06h in page 020h
 ```
 
-## Cache capabilities
+### Cache capabilities
 
 Direct memory access to cache
 
@@ -47,8 +47,19 @@ cachepagerange = $009h-00bh:    # continous three-page range capability
 Square brackets `[` and `]` imply indexing -- not direct memory access.
 
 ```
-@ = @[:0...3]       # page 0, registers from 0 to 3 inclusive. Four registers in total.
-@ = @[0...1:]       # pages from 0 to 1 inclusive. Two pages in total.
+@ = @01eh...01fh:    # direct capability to actual memory region. Two pages in total.
+
+# push @ here?
+
+@ = @[:0...3]       # page 0 (from memory range given in the direct capability),
+                    # registers from 0 to 3 inclusive. Four registers in total.
+
+# ...do sth with the registers.
+# then pop @
+# then push @ again.
+
+@ = @[0...1:]       # pages from 0 to 1 inclusive. Two pages in total. Page 0 is the
+                    # first page in the memory range given in the direct capability.
 ```
 
 Indexing is a way for the program to access memory without knowing actual memory adressess.
