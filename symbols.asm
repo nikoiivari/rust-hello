@@ -15,8 +15,8 @@ req $[1/4:]     # require 1/4th of a page of cache to run (256/4 = 64)
     foo     : .stuv,        4byte, unsigned
     bar     :     .wxyz,    4byte, unsigned # .wxyz gets packed into the previous dword.
 
-# main is a label, but the func keyword makes it a function label.
-func main:
+# main is a label, but the fun keyword makes it a function label.
+fun main:
 
 accum = @           # save accumulator
 @ = @[:0...3]       # Square brackets '[' and ']' imply indexing -- not direct memory access
