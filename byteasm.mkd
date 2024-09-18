@@ -3,19 +3,42 @@
 `@` accumulator is inside mega-alu
 `$` cache is outside mega-alu
 
-`@` registers inside mega-alu have built in SIMD ops which take effect over a range.
+## Accumulator
+
+`@` registers inside mega-alu have built in SIMD ops which take effect over a range. The
+SIMD ops ar as follows: NAND, NOT, TON, ADD, BITSHIFT_LEFT, BITSHIFT_RIGHT.
+
+NAND and ADD operations always begin with one parameter in an even register, and the other
+parameter in an odd register. The result is stored in the next (increasing address) even
+register. This "sliding forwards" of the result to the next even register can be countered
+by doing two TON operations to move the result back to the previous even register, where
+the first parameter of the previous NAND or ADD operation used to be.
+
+A semi-serial adder that adds up 8bits per clock cycle could be used if that spares die area.
+
+NOT takes one input and inverts it, therefore NOT can be done from even to odd register, or
+from odd to even register. Two NOTs following one another on a value in an even register
+moves that value from the even register to the next (increasing address) even register.
+This happens through the odd register in between, which will have the inverted value after
+those two NOT operations are done. Two NOTs following one another on a value in an odd
+register moves that value from the odd register to the next (increasing address) odd
+register. This happens through the even register in between, which will have the inverted
+value after those two NOT operations are done. This is because the NOT operation is
+reversible. Two NOT operations on the same data returns the original value of that data.
+Or to put it as an equation: NOT( NOT(X) ) == X.
+
+The NOT operation can also be performed in the other direction, towards decreasing adresses.
+This allows moving the values to a previous (decreasing address) register.
+
+TON is the name of the NOT operation backwards.
+
+
+## Cache
+
 Code can be executed from cache. Perhaps compressed code can be decompressed in accumulator,
-but it needs to be moved to cache registers before it can be executed.
+but it needs to be moved to cache registers before it can be executed. No execution of code
+from accumulator!
 
-Four parallell execution units can be configured in three ways:
-
-- four indipendent master threads
-- one master thread, one slave thread (two pairs per core)
-- one master thread, three slave threads
-
-...or maybe use swizzles for parallel execution?
-
-# Have capabilities work on one byte granularity with swizzles
 
 ## Direct memory access through capabilities
 
