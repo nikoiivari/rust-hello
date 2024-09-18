@@ -4,8 +4,8 @@
 `$` cache is outside mega-alu
 
 `@` registers inside mega-alu have built in SIMD ops which take effect over a range.
-Code can be executed from cache. Perhaps compressed code can be decompressed, and also
-executed from accumulator registers.
+Code can be executed from cache. Perhaps compressed code can be decompressed in accumulator,
+but it needs to be moved to cache registers before it can be executed.
 
 Four parallell execution units can be configured in three ways:
 
@@ -47,19 +47,19 @@ cachepagerange = $009h-00bh:    # continous three-page range capability
 Square brackets `[` and `]` imply indexing -- not direct memory access.
 
 ```
-@ = @01eh...01fh:    # direct capability to actual memory region. Two pages in total.
+@ = @01eh...01fh:    # direct memory capability to actual memory region. Two pages in total.
 
 # push @ here?
 
-@ = @[:0...3]       # page 0 (from memory range given in the direct capability),
+@ = @[:0...3]       # page 0 (from memory range given in the direct memory capability),
                     # registers from 0 to 3 inclusive. Four registers in total.
 
 # ...do sth with the registers.
 # then pop @
 # then push @ again.
 
-@ = @[0...1:]       # pages from 0 to 1 inclusive. Two pages in total. Page 0 is the
-                    # first page in the memory range given in the direct capability.
+@ = @[0...1:]       # pages from 0 to 1 inclusive. Two pages in total. Page 0 is the first
+                    # page in the memory range given in the direct memory capability.
 ```
 
 Indexing is a way for the program to access memory without knowing actual memory adressess.
@@ -67,20 +67,6 @@ When a program starts it recieves a capability to the memory it can access, and 
 can be split off to sub-capabilities that control smaller sub-areas of that memory. Indexed
 memory areas are always continous -- no memory mapping of discontinous pages is done.
 
-## Extension for allocation and virtual memory?
-
-If the syntatic sugar below was to be used, it would probably still just be calling
-OS systemcalls, or the equivalent of those, to allocate the memory, and pass the capability
-to the calling process. The assembler itself does not manage memory allocation beyond indexing
-as explained above.
-
-```
-accumallocpagecap = @(1)        # assign a single allocated page capability - needs some method
-                                # to check if allocation failed
-accumallocpagerange = @(3)      # assign a range of three (3) allocated pages - needs some method
-                                # to check if allocation failed
-cacheallocpagerange = $(2)      # same as above, but allocating from cache - not accumulator.
-```
 
 ## add constant to accumulator, then add from memory, using one's complement addition.
 
