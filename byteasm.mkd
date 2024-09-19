@@ -6,7 +6,7 @@
 ## Accumulator
 
 `@` registers inside mega-alu have built in SIMD ops which take effect over a range. The
-SIMD ops ar as follows: NAND, NOT, TON, XOR, BITSHIFT_LEFT, BITSHIFT_RIGHT.
+SIMD ops ar as follows: NAND, XOR, NOT, TON, BITSHIFT_LEFT, BITSHIFT_RIGHT.
 
 NAND and XOR operations always begin with one parameter in an even register, and the other
 parameter in an odd register. The result is stored in the next (increasing address) even
@@ -29,9 +29,7 @@ reversible. Two NOT operations on the same data returns the original value of th
 Or to put it as an equation: NOT( NOT(X) ) == X.
 
 The NOT operation can also be performed in the other direction, towards decreasing adresses.
-This allows moving the values to a previous (decreasing address) register.
-
-TON is the name of the NOT operation backwards.
+This allows moving the values to a previous (decreasing address) register. This is doing NOT backwards. TON is the name of the NOT operation backwards.
 
 
 ## Cache
