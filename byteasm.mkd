@@ -177,8 +177,8 @@ onoverflow .s cap_code3
 
 - .N Set if the result of an operation is a negative integer
 - .O Set on overflow
-- .B
-- .I
+- .B 
+- .I Interrupt?
 - .T
 - .Z Set if the result of an operation is a zero. Also .N is set if zero is negative.
 - .U Undefined instruction?
