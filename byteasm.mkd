@@ -6,15 +6,16 @@
 ## Accumulator
 
 `@` registers inside mega-alu have built in SIMD ops which take effect over a range. The
-SIMD ops ar as follows: NAND, NOT, TON, ADD, BITSHIFT_LEFT, BITSHIFT_RIGHT.
+SIMD ops ar as follows: NAND, NOT, TON, XOR, BITSHIFT_LEFT, BITSHIFT_RIGHT.
 
-NAND and ADD operations always begin with one parameter in an even register, and the other
+NAND and XOR operations always begin with one parameter in an even register, and the other
 parameter in an odd register. The result is stored in the next (increasing address) even
 register. This "sliding forwards" of the result to the next even register can be countered
 by doing two TON operations to move the result back to the previous even register, where
-the first parameter of the previous NAND or ADD operation used to be.
+the first parameter of the previous NAND or XOR operation used to be.
 
-A semi-serial adder that adds up 8bits per clock cycle could be used if that spares die area.
+Having an adder would be too slow. It should have a XOR-gate instead of an adder. XOR-gates
+are made out of four NAND-gates, but it is not too expensive to have XOR-gates here.
 
 NOT takes one input and inverts it, therefore NOT can be done from even to odd register, or
 from odd to even register. Two NOTs following one another on a value in an even register
