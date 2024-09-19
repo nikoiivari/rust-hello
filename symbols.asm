@@ -10,10 +10,12 @@ req $[1/4:]     # require 1/4th of a page of cache to run (256/4 = 64)
 
 # Variable definitions in the scope of func main. These are similiar to labels,
 # and have a colon ':' after the variable name.
-    accum   : .stuvwxyz,    8byte, capability
-    cache   : .stuvwxyz,    8byte, capability
-    foo     : .stuv,        4byte, unsigned
-    bar     :     .wxyz,    4byte, unsigned # .wxyz gets packed into the previous dword.
+    accum   : even  .stuvwxyz   8byte   capability
+    cache   : odd   .stuvwxyz   8byte   capability
+    foo     : even  .stuv       4byte   unsigned
+    bar     : pack      .wxyz   4byte   unsigned    # .wxyz gets packed into
+                                                    # the previous dword.
+                                                    # It will be even.
 
 # main is a label, but the fun keyword makes it a function label.
 fun main:

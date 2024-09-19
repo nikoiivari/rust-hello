@@ -69,6 +69,8 @@ cachepagerange = $009h-00bh:    # continous three-page range capability
 Square brackets `[` and `]` imply indexing -- not direct memory access.
 
 ```
+# push @ here?
+
 @ = @01eh...01fh:    # direct memory capability to actual memory region. Two pages in total.
 
 # push @ here?
@@ -89,6 +91,44 @@ When a program starts it recieves a capability to the memory it can access, and 
 can be split off to sub-capabilities that control smaller sub-areas of that memory. Indexed
 memory areas are always continous -- no memory mapping of discontinous pages is done.
 
+
+## Assignment instruction
+
+The regular assignment instruction is the equal-sign: `=`.
+
+```
+var = other_var     # move data from other_var to var
+
+```
+
+The assignment instruction also has a variant that can add gaps between registers in the
+memory range. For example you can spread the registers from `other_var` so that there is
+a gap of three registers in the destination `var`.
+
+```
+# variable definitions
+var[:16]        :   even    .stuvwxyz   8byte   unsigned
+other_var[:4]   :   even    .stuvwxyz   8byte   unsigned
+
+# ...
+
+var =\\\ other_var      # 4 registers is spread out to 16 registers
+```
+
+Using syntatic sugar provided by the assembler one can define complex patterns for
+the data being moved to the destination.
+
+```
+# variable definitions
+var[:16]        :   even    .stuvwxyz   8byte   unsigned
+other_var[:4]   :   even    .stuvwxyz   8byte   unsigned
+
+# ...
+
+var =\\\=\\\==\\\\\\ other_var      # 4 registers is spread out in a pattern
+```
+
+These syntatic-sugar patterns will generate multiple actual assignment instructions.
 
 ## add constant to accumulator, then add from memory, using one's complement addition.
 
