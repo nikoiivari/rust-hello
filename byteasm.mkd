@@ -6,7 +6,7 @@
 ## Accumulator
 
 `@` registers inside mega-alu have built in SIMD ops which take effect over a range. The
-SIMD ops ar as follows: NAND, XOR, NOT, TON, BITSHIFT_LEFT, BITSHIFT_RIGHT.
+SIMD ops ar as follows: NAND, XOR, NOT, TON, BITSHIFT_LEFT, BITSHIFT_RIGHT and DUP.
 
 NAND and XOR operations always begin with one parameter in an even register, and the other
 parameter in an odd register. The result is stored in the next (increasing address) even
@@ -31,6 +31,9 @@ Or to put it as an equation: NOT( NOT(X) ) == X.
 The NOT operation can also be performed in the other direction, towards decreasing adresses.
 This allows moving the values to a previous (decreasing address) register. This is doing NOT backwards. TON is the name of the NOT operation backwards.
 
+The DUP instruction duplicates values from an even register to odd registers. This is useful
+in situations where a logic gate is constructed of NAND-gates, and the inputs to the NAND-gate
+are duplicated, eg. OR, NOR, XNOR, AND, NOT and MUX.
 
 ## Cache
 
@@ -129,6 +132,12 @@ var =\\\=\\\==\\\\\\ other_var      # 4 registers is spread out in a pattern
 ```
 
 These syntatic-sugar patterns will generate multiple actual assignment instructions.
+
+## Duplicate instruction
+
+The duplicate instruction `dup` allows duplicating a value in an even register to the next
+odd register. It will not duplicate values from odd to even registers. It will also not
+duplicate values towards the previous odd register.
 
 ## add constant to accumulator, then add from memory, using one's complement addition.
 
