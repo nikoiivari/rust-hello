@@ -6,34 +6,37 @@
 ## Accumulator
 
 `@` registers inside mega-alu have built in SIMD ops which take effect over a range. The
-SIMD ops ar as follows: NAND, NOR, NOT, TON, BITSHIFT_LEFT, BITSHIFT_RIGHT and DUP.
+SIMD ops ar as follows: NAND, NOR, NOT, TON, BSL, BSR, SKIP and SLIP.
 
 NAND and NOR operations always begin with one parameter in an even register, and the other
-parameter in an odd register. The result is stored in the next (increasing address) even
-register. This "sliding forwards" of the result to the next even register can be countered
-by doing two TON operations to move the result back to the previous even register, where
-the first parameter of the previous NAND or NOR operation used to be.
-
-A NOR operation instead of XOR.
+parameter in the next odd register. The result is stored in the next (increasing address)
+even register. This "sliding forwards" of the result to the next even register can be
+countered by doing two TON operations to move the result back to the previous even register,
+where the first parameter of the previous NAND or NOR operation used to be.
 
 NOT takes one input and inverts it, therefore NOT can be done from even to odd register, or
 from odd to even register. Two NOTs following one another on a value in an even register
 moves that value from the even register to the next (increasing address) even register.
 This happens through the odd register in between, which will have the inverted value after
-those two NOT operations are done. Two NOTs following one another on a value in an odd
-register moves that value from the odd register to the next (increasing address) odd
-register. This happens through the even register in between, which will have the inverted
-value after those two NOT operations are done. This is because the NOT operation is
-reversible. Two NOT operations on the same data returns the original value of that data.
-Or to put it as an equation: NOT( NOT(X) ) == X.
+the first of those two NOT operations is done. Likewise two NOTs following one another on a
+value in an odd register moves that value from the odd register to the next (increasing 
+address) odd register. This happens through the even register in between, which will have the inverted bits after the first of those two NOT operations is done. This is because the NOT
+operation is reversible. Two NOT operations on the same data returns the original value of
+that data. Or to put it as an equation: NOT( NOT(X) ) == X.
 
 The NOT operation can also be performed in the other direction, towards decreasing adresses.
-This allows moving the values to a previous (decreasing address) register. This is doing NOT
-backwards. TON is the name of the NOT operation backwards.
+TON is the name of the NOT operation backwards. One TON op inverts the bits of a value and
+stores the result in the previous register (odd or even). Two TON ops in succession will
+invert the bits twice, and store the results in the register two steps backwards. The
+register in between will be left with the inverted bits. This allows moving the values to a
+previous (decreasing address) register, two steps backwards. 
 
-The DUP operation duplicates values from an even register to odd registers. This is useful
-in situations where a logic gate is constructed of NAND-gates, and the inputs to the NAND-gate
-are duplicated, eg. OR, XNOR, AND and MUX.
+The SKIP operation duplicates values from even registers to the next even registers. The
+odd registers in between are skipped and left unchanged.
+
+The SLIP operation duplicates values from even registers to the next odd registers. This
+is useful in situations where a logic gate is constructed of NAND-gates or NOR-gates, and
+the inputs are duplicated, eg. OR, XNOR, NOT, AND and MUX.
 
 ## Cache
 
@@ -132,12 +135,6 @@ var =\\\=\\\==\\\\\\ other_var      # 4 registers is spread out in a pattern
 ```
 
 These syntatic-sugar patterns will generate multiple actual assignment instructions.
-
-## Duplicate instruction
-
-The duplicate instruction `dup` allows duplicating a value in an even register to the next
-odd register. It will not duplicate values from odd to even registers. It will also not
-duplicate values towards the previous odd register.
 
 ## add constant to accumulator, then add from memory, using one's complement addition.
 
