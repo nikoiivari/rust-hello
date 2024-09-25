@@ -6,7 +6,7 @@
 ## Accumulator
 
 `@` registers inside mega-alu have built in SIMD ops which take effect over a range. The
-SIMD ops ar as follows: NAND, NOR, NOT, TON, BSL, BSR, SKIP and SLIP.
+SIMD ops ar as follows: NAND, NOR, NOT, TON, SHL, SHR, SKIP and SLIP.
 
 NAND and NOR operations always begin with one parameter in an even register, and the other
 parameter in the next odd register. The result is stored in the next (increasing address)
