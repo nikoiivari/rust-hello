@@ -8,10 +8,16 @@
 `@` registers inside mega-alu have built in SIMD ops which take effect over a range. The
 SIMD ops ar as follows: NAND, NOR, NOT, TON, SHL, SHR, SKIP and SLIP.
 
-Can you have increment instruction that slides forwards? How do you increment the Instruction
-Capability (IC)?
+- Eight parallel instructions and eight parallel data is actually MIMD; not SIMD.
 
-Also maybe have register windows for PCB that stores @, $, IC and ...what?
+- Can you have increment instruction that slides forwards? How do you increment the
+Instruction Capability (IC)?
+
+- Also maybe have register windows for PCB that stores @, $, IC and ...what?
+
+- A way to set locus on specific data so that when data slides forward through the accumulator
+ops, the now modified data is accessible through the same variable without explicit indexing.
+So a sliding register window with implied indexing?
 
 NAND and NOR operations always begin with one parameter in an even register, and the other
 parameter in the next odd register. The result is stored in the next (increasing address)
