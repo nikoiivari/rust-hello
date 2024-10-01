@@ -5,15 +5,16 @@
 
 ## Accumulator
 
-`@` registers inside mega-alu have built in SIMD ops which take effect over a range. The
-SIMD ops ar as follows: NAND, NOR, NOT, TON, SHL, SHR, SKIP and SLIP.
+`@` registers inside mega-alu have built in MIMD ops which take effect over a range. The
+MIMD ops ar as follows: NAND, NOR, NOT, TON, ROL, ROR, SKIP and SLIP.
 
 - Eight parallel instructions and eight parallel data is actually MIMD; not SIMD.
 
 - Can you have increment instruction that slides forwards? How do you increment the
 Instruction Capability (IC)?
 
-- Also maybe have register windows for PCB that stores @, $, IC and ...what?
+- Also maybe have register windows for PCB that stores @, $, IC and PR. PR is predication reg.
+Is .NOBITZUC the PR?
 
 - A way to set locus on specific data so that when data slides forward through the accumulator
 ops, the now modified data is accessible through the same variable without explicit indexing.
