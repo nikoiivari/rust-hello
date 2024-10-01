@@ -5,8 +5,12 @@
 
 ## Accumulator
 
-`@` registers inside mega-alu have built in MIMD ops which take effect over a range. The
-MIMD ops ar as follows: NAND, NOR, NOT, TON, ROL, ROR, SKIP and SLIP.
+`@` registers inside mega-alu have built in MIMD ops which take effect over a range.
+The MIMD ops come in two forms vertical and horizontal.
+
+Vertical ops are: NAND, NOR, NOT, TON, and DUP.
+
+Horizontal ops are: ROL, ROR, ADD
 
 - Eight parallel instructions and eight parallel data is actually MIMD; not SIMD.
 
